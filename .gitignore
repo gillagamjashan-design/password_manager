@@ -1,0 +1,61 @@
+# Build artifacts
+a.out
+*.o
+*.exe
+*.so
+*.dylib
+target/
+dist/
+build/
+out/
+
+# Rust specific
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Logs and temporary files
+*.log
+*.tmp
+temp/
+tmp/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-*
+.project
+.settings/
+.claude/
+
+# Dependencies
+node_modules/
+vendor/
+
+# System files
+.gemini/
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+
+# Compiled source
+*.com
+*.class
+*.dll
