@@ -36,7 +36,7 @@ private:
 
     // NEW: Handle ball going out of bounds
     void checkOutOfBounds();
-    void handleThrowIn(bool fromTop, float xPos, int possessionTeam);
+    void handleThrowIn(bool fromTop, float xPos, int possessionTeam, const std::string& side = "");
 
     // Window
     sf::RenderWindow window;

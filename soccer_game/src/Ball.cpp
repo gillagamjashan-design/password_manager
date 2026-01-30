@@ -50,6 +50,11 @@ void Ball::setPosition(const Vec2& pos) {
     shape.setPosition(position.x, position.y);
 }
 
+// NEW: Directly set ball velocity (useful for stopping ball completely)
+void Ball::setVelocity(const Vec2& vel) {
+    velocity = vel;
+}
+
 Vec2 Ball::getPosition() const {
     return position;
 }

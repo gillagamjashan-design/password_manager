@@ -13,6 +13,7 @@ public:
 
     void kick(const Vec2& direction, float power);
     void setPosition(const Vec2& pos);
+    void setVelocity(const Vec2& vel); // NEW: Directly set velocity (for stopping ball)
     Vec2 getPosition() const;
     Vec2 getVelocity() const;
     float getRadius() const;

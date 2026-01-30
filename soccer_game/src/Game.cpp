@@ -135,10 +135,13 @@ void Game::update(float deltaTime) {
     // Update ball
     ball->update(deltaTime);
 
-    // Handle collisions and game logic
-    handleCollisions();
-    checkGoals();
-    checkOutOfBounds(); // NEW: Check if ball went out of bounds
+    // FIXED: Check game logic in correct priority order
+    // 1. Goals are highest priority (score!)
+    // 2. Out-of-bounds is second priority (reset possession)
+    // 3. Collisions last (normal gameplay)
+    checkGoals();           // FIRST - check if ball scored
+    checkOutOfBounds();     // SECOND - check if ball went out
+    handleCollisions();     // LAST - handle player collisions and boundary bounces
 }
 
 void Game::render() {
@@ -160,17 +163,11 @@ void Game::handleCollisions() {
     Vec2 ballPos = ball->getPosition();
     float ballRadius = ball->getRadius();
 
-    // Ball collision with pitch boundaries (excluding goals)
-    if (ballPos.x - ballRadius < 0.0f) {
-        ball->setPosition(Vec2(ballRadius, ballPos.y));
-        ball->bounceX();
-    }
-    if (ballPos.x + ballRadius > PITCH_WIDTH) {
-        ball->setPosition(Vec2(PITCH_WIDTH - ballRadius, ballPos.y));
-        ball->bounceX();
-    }
+    // REMOVED: Left/right boundary bouncing (handled by checkGoals and checkOutOfBounds)
+    // The ball should NOT bounce at left/right edges - it should either score or go out
 
-    // Top and bottom boundaries
+    // Top and bottom boundaries - ONLY bounce here, NOT at goals
+    // These are always in-bounds (top/bottom of pitch)
     if (ballPos.y - ballRadius < 0.0f) {
         ball->setPosition(Vec2(ballPos.x, ballRadius));
         ball->bounceY();
@@ -213,24 +210,34 @@ void Game::checkGoals() {
     float goalTop = (PITCH_HEIGHT - GOAL_WIDTH) / 2.0f;
     float goalBottom = goalTop + GOAL_WIDTH;
 
-    // Left goal (Team 2 scores)
-    if (ballPos.x - ballRadius < 0.0f &&
-        ballPos.y > goalTop && ballPos.y < goalBottom) {
+    // IMPROVED: More forgiving goal detection
+    // Allow ball if ANY part of it is in the goal area (not just center)
+    // Also check deeper to catch fast-moving balls
+
+    // Left goal (Team 2 scores) - check if ball crossed the line
+    if (ballPos.x - ballRadius <= 0.0f &&
+        ballPos.y + ballRadius >= goalTop &&
+        ballPos.y - ballRadius <= goalBottom) {
         scoreTeam2++;
+        std::cout << "GOAL! Red team scores! (Blue " << scoreTeam1 << " - " << scoreTeam2 << " Red)\n";
         resetPositions();
+        return; // Exit immediately after goal
     }
 
-    // Right goal (Team 1 scores)
-    if (ballPos.x + ballRadius > PITCH_WIDTH &&
-        ballPos.y > goalTop && ballPos.y < goalBottom) {
+    // Right goal (Team 1 scores) - check if ball crossed the line
+    if (ballPos.x + ballRadius >= PITCH_WIDTH &&
+        ballPos.y + ballRadius >= goalTop &&
+        ballPos.y - ballRadius <= goalBottom) {
         scoreTeam1++;
+        std::cout << "GOAL! Blue team scores! (Blue " << scoreTeam1 << " - " << scoreTeam2 << " Red)\n";
         resetPositions();
+        return; // Exit immediately after goal
     }
 }
 
 void Game::resetPositions() {
     ball->setPosition(Vec2(PITCH_WIDTH / 2.0f, PITCH_HEIGHT / 2.0f));
-    ball->kick(Vec2(0.0f, 0.0f), 0.0f); // Stop the ball
+    ball->setVelocity(Vec2(0.0f, 0.0f)); // FIXED: Stop the ball completely
     team1->resetPositions(PITCH_WIDTH, PITCH_HEIGHT);
     team2->resetPositions(PITCH_WIDTH, PITCH_HEIGHT);
 }
@@ -349,7 +356,7 @@ void Game::drawUI() {
     }
 }
 
-// NEW: Check if ball went out of bounds (excluding goals)
+// IMPROVED: Check if ball went out of bounds (excluding goals)
 void Game::checkOutOfBounds() {
     Vec2 ballPos = ball->getPosition();
     float ballRadius = ball->getRadius();
@@ -357,78 +364,94 @@ void Game::checkOutOfBounds() {
     float goalTop = (PITCH_HEIGHT - GOAL_WIDTH) / 2.0f;
     float goalBottom = goalTop + GOAL_WIDTH;
 
-    bool isInGoalZone = (ballPos.y >= goalTop && ballPos.y <= goalBottom);
+    // IMPROVED: Check if ball's EDGES are in goal zone (not just center)
+    bool isInGoalZone = (ballPos.y + ballRadius >= goalTop &&
+                         ballPos.y - ballRadius <= goalBottom);
 
     // Check left side (not in goal area)
-    if (ballPos.x - ballRadius < 0.0f && !isInGoalZone) {
+    if (ballPos.x - ballRadius <= -5.0f && !isInGoalZone) {
         int lastKicker = ball->getLastKicker();
-        // If team 1 kicked it out on the left, team 2 gets possession
-        // If team 2 kicked it out, team 2 gets possession (defensive end)
+        // Team that didn't kick it out gets possession
         int possessionTeam = (lastKicker == 1) ? 2 : 1;
-        handleThrowIn(false, 50.0f, possessionTeam);
+        handleThrowIn(false, 50.0f, possessionTeam, "left");
         return;
     }
 
     // Check right side (not in goal area)
-    if (ballPos.x + ballRadius > PITCH_WIDTH && !isInGoalZone) {
+    if (ballPos.x + ballRadius >= PITCH_WIDTH + 5.0f && !isInGoalZone) {
         int lastKicker = ball->getLastKicker();
-        // If team 2 kicked it out on the right, team 1 gets possession
-        // If team 1 kicked it out, team 1 gets possession (defensive end)
+        // Team that didn't kick it out gets possession
         int possessionTeam = (lastKicker == 2) ? 1 : 2;
-        handleThrowIn(false, PITCH_WIDTH - 50.0f, possessionTeam);
+        handleThrowIn(false, PITCH_WIDTH - 50.0f, possessionTeam, "right");
         return;
     }
 
-    // Check top boundary
-    if (ballPos.y - ballRadius < 0.0f) {
-        int lastKicker = ball->getLastKicker();
-        // Team that didn't kick it out gets possession
-        int possessionTeam = (lastKicker == 1) ? 2 : 1;
-        handleThrowIn(true, ballPos.x, possessionTeam);
-        return;
-    }
+    // Check top boundary (REMOVED - top/bottom now bounce in handleCollisions)
+    // Top/bottom are handled by bouncing, not out-of-bounds
+    // if (ballPos.y - ballRadius <= -5.0f) {
+    //     int lastKicker = ball->getLastKicker();
+    //     int possessionTeam = (lastKicker == 1) ? 2 : 1;
+    //     handleThrowIn(true, ballPos.x, possessionTeam, "top");
+    //     return;
+    // }
 
-    // Check bottom boundary
-    if (ballPos.y + ballRadius > PITCH_HEIGHT) {
-        int lastKicker = ball->getLastKicker();
-        // Team that didn't kick it out gets possession
-        int possessionTeam = (lastKicker == 1) ? 2 : 1;
-        handleThrowIn(false, ballPos.x, possessionTeam);
-        return;
-    }
+    // Check bottom boundary (REMOVED - handled by bouncing)
+    // if (ballPos.y + ballRadius >= PITCH_HEIGHT + 5.0f) {
+    //     int lastKicker = ball->getLastKicker();
+    //     int possessionTeam = (lastKicker == 1) ? 2 : 1;
+    //     handleThrowIn(false, ballPos.x, possessionTeam, "bottom");
+    //     return;
+    // }
 }
 
-// NEW: Handle throw-in / ball reset after out of bounds
-void Game::handleThrowIn(bool fromTop, float xPos, int possessionTeam) {
-    // Reset ball position near the boundary
-    float yPos;
-    if (fromTop) {
-        yPos = 30.0f; // Near top boundary
+// IMPROVED: Handle throw-in / ball reset after out of bounds
+void Game::handleThrowIn(bool fromTop, float xPos, int possessionTeam, const std::string& side) {
+    // COMPLETELY STOP THE BALL FIRST - most important!
+    Vec2 ballPos = ball->getPosition();
+
+    // Determine where to place the ball based on which side it went out
+    Vec2 resetPos;
+    if (side == "left") {
+        // Ball went out on left side
+        resetPos = Vec2(40.0f, ballPos.y);
+        // Clamp Y to valid range
+        if (resetPos.y < 50.0f) resetPos.y = 50.0f;
+        if (resetPos.y > PITCH_HEIGHT - 50.0f) resetPos.y = PITCH_HEIGHT - 50.0f;
+    } else if (side == "right") {
+        // Ball went out on right side
+        resetPos = Vec2(PITCH_WIDTH - 40.0f, ballPos.y);
+        // Clamp Y to valid range
+        if (resetPos.y < 50.0f) resetPos.y = 50.0f;
+        if (resetPos.y > PITCH_HEIGHT - 50.0f) resetPos.y = PITCH_HEIGHT - 50.0f;
     } else {
-        yPos = PITCH_HEIGHT - 30.0f; // Near bottom boundary
+        // Fallback (shouldn't happen now that we removed top/bottom)
+        resetPos = Vec2(xPos, fromTop ? 30.0f : PITCH_HEIGHT - 30.0f);
     }
 
-    // Clamp xPos to valid range
-    if (xPos < 50.0f) xPos = 50.0f;
-    if (xPos > PITCH_WIDTH - 50.0f) xPos = PITCH_WIDTH - 50.0f;
-
-    // Reset ball position and stop it
-    ball->setPosition(Vec2(xPos, yPos));
-    ball->kick(Vec2(0.0f, 0.0f), 0.0f); // Stop the ball
+    // STOP THE BALL COMPLETELY
+    ball->setPosition(resetPos);
+    ball->setVelocity(Vec2(0.0f, 0.0f)); // Set velocity directly to zero
 
     // Move a player from the possession team near the ball
     Team* team = (possessionTeam == 1) ? team1.get() : team2.get();
     if (!team->getPlayers().empty()) {
-        Player* nearestPlayer = team->getPlayers()[0].get();
-        Vec2 playerPos(xPos + 30.0f, yPos);
-        nearestPlayer->setPosition(playerPos);
-        nearestPlayer->setVelocity(Vec2(0.0f, 0.0f));
+        // Get closest player to new ball position
+        Player* nearestPlayer = team->getClosestPlayerToBall(*ball);
+        if (nearestPlayer) {
+            // Position player near the ball
+            Vec2 offset = (possessionTeam == 1) ? Vec2(30.0f, 0.0f) : Vec2(-30.0f, 0.0f);
+            nearestPlayer->setPosition(resetPos + offset);
+            nearestPlayer->setVelocity(Vec2(0.0f, 0.0f));
+        }
     }
 
-    // NEW: Set notification message
+    // Set notification message
     std::string teamName = (possessionTeam == 1) ? "BLUE" : "RED";
-    outOfBoundsMessage = "OUT OF BOUNDS! " + teamName + " team gets possession";
+    std::string sideText = side.empty() ? "" : " (" + side + " side)";
+    outOfBoundsMessage = "OUT OF BOUNDS! " + teamName + " team possession";
     outOfBoundsMessageTime = MESSAGE_DISPLAY_DURATION;
 
-    std::cout << "Out of bounds! Team " << possessionTeam << " (" << teamName << ") gets possession.\n";
+    std::cout << "OUT OF BOUNDS" << sideText << "! Team " << possessionTeam
+              << " (" << teamName << ") gets possession at ("
+              << resetPos.x << ", " << resetPos.y << ")\n";
 }
