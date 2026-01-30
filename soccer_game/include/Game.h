@@ -38,6 +38,10 @@ private:
     void checkOutOfBounds();
     void handleThrowIn(bool fromTop, float xPos, int possessionTeam, const std::string& side = "");
 
+    // NEW: Throw-in protection helpers
+    void enforceOpponentDistance();  // Push opponents away from ball
+    void checkThrowInInput();        // Check if possession team pressed a key
+
     // Window
     sf::RenderWindow window;
 
@@ -62,6 +66,14 @@ private:
     std::string outOfBoundsMessage;
     float outOfBoundsMessageTime;
     static constexpr float MESSAGE_DISPLAY_DURATION = 2.0f;
+
+    // NEW: Throw-in protection system
+    bool throwInActive;           // Is a throw-in currently happening?
+    int possessionTeamId;         // Which team has possession (1 or 2)
+    int frozenTeamId;             // Which team is frozen (1 or 2, 0 = none)
+    float throwInTimer;           // Timer for AI auto-resume
+    static constexpr float MIN_OPPONENT_DISTANCE = 100.0f; // Min distance (like 2 meters in real soccer)
+    static constexpr float AI_AUTO_RESUME_TIME = 1.0f;     // AI waits 1 second then auto-resumes
 
     // Pitch dimensions
     static constexpr float PITCH_WIDTH = 900.0f;

@@ -9,7 +9,8 @@ Game::Game(GameMode mode)
       scoreTeam1(0), scoreTeam2(0), matchTime(0.0f),
       matchDuration(180.0f), gameRunning(true),
       currentMode(mode), playersPerTeam(static_cast<int>(mode)),
-      outOfBoundsMessage(""), outOfBoundsMessageTime(0.0f) { // Initialize notification
+      outOfBoundsMessage(""), outOfBoundsMessageTime(0.0f),
+      throwInActive(false), possessionTeamId(0), frozenTeamId(0), throwInTimer(0.0f) { // NEW: Initialize throw-in state
 
     window.setFramerateLimit(60);
 
@@ -100,11 +101,22 @@ void Game::update(float deltaTime) {
         }
     }
 
+    // NEW: Check if throw-in is active and check for first input
+    if (throwInActive) {
+        checkThrowInInput();
+        // Keep enforcing distance every frame during throw-in
+        enforceOpponentDistance();
+    }
+
     // Update input
     input->update();
 
-    // Control player 1 from team 1
-    if (!team1->getPlayers().empty()) {
+    // NEW: Only allow possession team to control during throw-in
+    bool team1CanMove = !throwInActive || (throwInActive && possessionTeamId == 1);
+    bool team2CanMove = !throwInActive || (throwInActive && possessionTeamId == 2);
+
+    // Control player 1 from team 1 (only if not frozen)
+    if (!team1->getPlayers().empty() && team1CanMove) {
         Player* controlledPlayer = team1->getPlayers()[0].get();
         Vec2 moveDir = input->getMovementDirection();
 
@@ -127,10 +139,39 @@ void Game::update(float deltaTime) {
         }
     }
 
-    // Update teams
+    // Update teams (freeze frozen team during throw-in)
     // NEW: Pass team ID (1 for team1, 2 for team2) to track ball kicks
-    team1->update(deltaTime, *ball, false, 1); // Human controlled (AI disabled), Team ID = 1
-    team2->update(deltaTime, *ball, true, 2);  // AI controlled, Team ID = 2
+    if (team1CanMove) {
+        team1->update(deltaTime, *ball, false, 1); // Human controlled (AI disabled), Team ID = 1
+    } else {
+        // Team 1 is frozen - move to defensive positions only
+        for (auto& player : team1->getPlayers()) {
+            // Move slowly to defensive position (left side)
+            float xDefensive = PITCH_WIDTH * 0.25f; // Left side defense
+            Vec2 defendPos(xDefensive, player->getPosition().y);
+            Vec2 direction = defendPos - player->getPosition();
+            if (direction.length() > 10.0f) {
+                player->moveTowards(defendPos, deltaTime * 0.3f); // Slow movement
+            }
+            player->update(deltaTime);
+        }
+    }
+
+    if (team2CanMove) {
+        team2->update(deltaTime, *ball, true, 2);  // AI controlled, Team ID = 2
+    } else {
+        // Team 2 is frozen - move to defensive positions only
+        for (auto& player : team2->getPlayers()) {
+            // Move slowly to defensive position (right side)
+            float xDefensive = PITCH_WIDTH * 0.75f; // Right side defense
+            Vec2 defendPos(xDefensive, player->getPosition().y);
+            Vec2 direction = defendPos - player->getPosition();
+            if (direction.length() > 10.0f) {
+                player->moveTowards(defendPos, deltaTime * 0.3f); // Slow movement
+            }
+            player->update(deltaTime);
+        }
+    }
 
     // Update ball
     ball->update(deltaTime);
@@ -302,8 +343,41 @@ void Game::drawUI() {
         timer.setPosition(PITCH_WIDTH / 2.0f - 30.0f, 40.0f);
         window.draw(timer);
 
-        // NEW: Out-of-bounds notification message
-        if (outOfBoundsMessageTime > 0.0f && !outOfBoundsMessage.empty()) {
+        // NEW: Throw-in active message (takes priority over out-of-bounds message)
+        if (throwInActive) {
+            std::string teamName = (possessionTeamId == 1) ? "BLUE" : "RED";
+            std::string throwInText = "THROW-IN - " + teamName + " team - Ready...";
+            if (possessionTeamId == 1) {
+                throwInText += "\nPress any key to play";
+            }
+
+            sf::Text throwInDisplay(throwInText, font, 32);
+            throwInDisplay.setFillColor(sf::Color::Cyan);
+            throwInDisplay.setStyle(sf::Text::Bold);
+
+            // Center the text
+            sf::FloatRect textBounds = throwInDisplay.getLocalBounds();
+            throwInDisplay.setPosition(PITCH_WIDTH / 2.0f - textBounds.width / 2.0f, PITCH_HEIGHT / 2.0f - 80.0f);
+
+            // Add a semi-transparent background
+            sf::RectangleShape bgRect(sf::Vector2f(textBounds.width + 30.0f, textBounds.height + 30.0f));
+            bgRect.setFillColor(sf::Color(0, 0, 100, 200)); // Blue-ish background
+            bgRect.setPosition(PITCH_WIDTH / 2.0f - textBounds.width / 2.0f - 15.0f, PITCH_HEIGHT / 2.0f - 95.0f);
+
+            window.draw(bgRect);
+            window.draw(throwInDisplay);
+
+            // Draw circle around ball to show "no entry" zone
+            sf::CircleShape noEntryZone(MIN_OPPONENT_DISTANCE);
+            noEntryZone.setFillColor(sf::Color::Transparent);
+            noEntryZone.setOutlineColor(sf::Color(255, 255, 0, 100)); // Yellow, semi-transparent
+            noEntryZone.setOutlineThickness(2.0f);
+            noEntryZone.setOrigin(MIN_OPPONENT_DISTANCE, MIN_OPPONENT_DISTANCE);
+            noEntryZone.setPosition(ball->getPosition().x, ball->getPosition().y);
+            window.draw(noEntryZone);
+        }
+        // NEW: Out-of-bounds notification message (only if throw-in not active)
+        else if (outOfBoundsMessageTime > 0.0f && !outOfBoundsMessage.empty()) {
             sf::Text oobText(outOfBoundsMessage, font, 28);
             oobText.setFillColor(sf::Color::Yellow);
             oobText.setStyle(sf::Text::Bold);
@@ -454,4 +528,89 @@ void Game::handleThrowIn(bool fromTop, float xPos, int possessionTeam, const std
     std::cout << "OUT OF BOUNDS" << sideText << "! Team " << possessionTeam
               << " (" << teamName << ") gets possession at ("
               << resetPos.x << ", " << resetPos.y << ")\n";
+
+    // NEW: Activate throw-in protection
+    throwInActive = true;
+    possessionTeamId = possessionTeam;
+    frozenTeamId = (possessionTeam == 1) ? 2 : 1; // Freeze the OTHER team
+    throwInTimer = 0.0f; // Reset timer
+
+    // Push opponents away from ball (soccer rules: 2 meters / ~100 pixels)
+    enforceOpponentDistance();
+
+    std::cout << "THROW-IN ACTIVE: Team " << possessionTeam << " has possession.\n";
+    std::cout << "Team " << frozenTeamId << " is frozen until first input.\n";
+}
+
+// NEW: Push opponent players away from ball (minimum distance rule)
+void Game::enforceOpponentDistance() {
+    if (!throwInActive) return;
+
+    Vec2 ballPos = ball->getPosition();
+    Team* opponentTeam = (frozenTeamId == 1) ? team1.get() : team2.get();
+
+    for (auto& player : opponentTeam->getPlayers()) {
+        Vec2 playerPos = player->getPosition();
+        float distance = playerPos.distance(ballPos);
+
+        // If opponent is too close, push them away
+        if (distance < MIN_OPPONENT_DISTANCE) {
+            Vec2 pushDir = (playerPos - ballPos).normalized();
+
+            // Push to exactly MIN_OPPONENT_DISTANCE away
+            Vec2 newPos = ballPos + pushDir * MIN_OPPONENT_DISTANCE;
+
+            // Make sure new position is on pitch
+            if (newPos.x < 20.0f) newPos.x = 20.0f;
+            if (newPos.x > PITCH_WIDTH - 20.0f) newPos.x = PITCH_WIDTH - 20.0f;
+            if (newPos.y < 20.0f) newPos.y = 20.0f;
+            if (newPos.y > PITCH_HEIGHT - 20.0f) newPos.y = PITCH_HEIGHT - 20.0f;
+
+            player->setPosition(newPos);
+            player->setVelocity(Vec2(0.0f, 0.0f)); // Stop them
+        }
+    }
+
+    std::cout << "Enforced minimum distance: opponents pushed " << MIN_OPPONENT_DISTANCE << " pixels away.\n";
+}
+
+// NEW: Check if possession team pressed any key (first input detection)
+void Game::checkThrowInInput() {
+    if (!throwInActive) return;
+
+    // Increment timer
+    throwInTimer += FIXED_TIME_STEP;
+
+    // Check if possession team made first input
+    bool inputDetected = false;
+
+    if (possessionTeamId == 1) {
+        // Team 1 is human controlled - check for arrow keys or space
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            inputDetected = true;
+            std::cout << "Player input detected! Unfreezing game...\n";
+        }
+    } else {
+        // Team 2 is AI - auto-resume after AI_AUTO_RESUME_TIME seconds
+        if (throwInTimer >= AI_AUTO_RESUME_TIME) {
+            inputDetected = true;
+            std::cout << "AI auto-resume timer expired! Unfreezing game...\n";
+        }
+    }
+
+    if (inputDetected) {
+        // Unfreeze the game!
+        throwInActive = false;
+        frozenTeamId = 0;
+        possessionTeamId = 0;
+        throwInTimer = 0.0f;
+        outOfBoundsMessage = ""; // Clear the message
+        outOfBoundsMessageTime = 0.0f;
+
+        std::cout << "THROW-IN COMPLETE: Game unfrozen, play resumes!\n";
+    }
 }
