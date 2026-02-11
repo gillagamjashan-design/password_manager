@@ -1,0 +1,21 @@
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vault files (for testing - never commit vault data!)
+*.enc
+vault.json
+test_vault.*
