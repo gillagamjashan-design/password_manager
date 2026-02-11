@@ -1,4 +1,4 @@
-.PHONY: help build run release test fmt clippy clean install audit doc all
+.PHONY: help build run run-init run-generate release test fmt clippy clean install audit doc all
 
 # Default target - show help
 help:
@@ -6,7 +6,9 @@ help:
 	@echo ""
 	@echo "  make help       - Show this help message"
 	@echo "  make build      - Build the project in debug mode"
-	@echo "  make run        - Run the project in debug mode"
+	@echo "  make run        - Run the project (shows help)"
+	@echo "  make run-init   - Initialize a vault"
+	@echo "  make run-generate - Generate a password"
 	@echo "  make release    - Build optimized release binary"
 	@echo "  make test       - Run all tests"
 	@echo "  make fmt        - Format code with rustfmt"
@@ -23,10 +25,19 @@ build:
 	@echo "Building in debug mode..."
 	cargo build
 
-# Run in debug mode
+# Run in debug mode (shows help)
 run:
 	@echo "Running password manager..."
-	cargo run
+	cargo run -- --help
+
+# Quick commands for testing
+run-init:
+	@echo "Initializing vault..."
+	cargo run -- init
+
+run-generate:
+	@echo "Generating password..."
+	cargo run -- generate
 
 # Build optimized release binary
 release:
