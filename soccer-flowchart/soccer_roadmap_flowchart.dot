@@ -1,0 +1,166 @@
+// Soccer Player Development Roadmap
+digraph {
+	dpi=300 rankdir=TB size="12,16"
+	node [fontname=Arial fontsize=10 shape=box style="rounded,filled"]
+	edge [fontname=Arial fontsize=9]
+	start [label="START:
+Aspiring Soccer Player" fillcolor="#90EE90" fontsize=12 shape=ellipse style=filled]
+	initial1 [label="INITIAL STAGE
+
+Basic Skills Training:
+• Dribbling
+• Passing
+• Shooting" fillcolor="#87CEEB"]
+	initial2 [label="Fitness Foundation:
+• Agility exercises
+• Basic conditioning
+• Coordination drills" fillcolor="#87CEEB"]
+	dec1 [label="Continue
+Training?" fillcolor="#FFE4B5" shape=diamond]
+	alt1 [label="Recreational
+Soccer Path" fillcolor="#F0E68C"]
+	dev1 [label="DEVELOPMENTAL STAGE
+
+Join Youth Team/Academy" fillcolor="#FFD700"]
+	dev2 [label="Technical Skills:
+• Ball control
+• Positioning
+• Tactical understanding
+• Team dynamics" fillcolor="#FFD700"]
+	injury1 [label="Injury?" fillcolor="#FFE4B5" shape=diamond]
+	recovery1 [label="Injury Recovery:
+• Rehabilitation
+• Physical therapy
+• Gradual return" fillcolor="#F0E68C"]
+	int1 [label="INTERMEDIATE STAGE
+
+Competitive Youth Leagues
+Regional Clubs" fillcolor="#FFA500"]
+	int2 [label="Advanced Development:
+• Tactical mastery
+• Team strategy
+• Match analysis
+• Mental preparation" fillcolor="#FFA500"]
+	perf1 [label="Elite
+Potential?" fillcolor="#FFE4B5" shape=diamond]
+	alt2 [label="Semi-Pro/Amateur
+Career Path" fillcolor="#F0E68C"]
+	injury2 [label="Injury?" fillcolor="#FFE4B5" shape=diamond]
+	recovery2 [label="Extended Recovery:
+• Medical treatment
+• Career reassessment
+• Alternative training" fillcolor="#F0E68C"]
+	adv1 [label="ADVANCED STAGE
+
+Semi-Professional Leagues
+Elite Academies" fillcolor="#FF6347"]
+	adv2 [label="Specialized Training:
+• Position specialization
+  (Forward, Midfielder,
+   Defender, Goalkeeper)" fillcolor="#FF6347"]
+	adv3 [label="Mental & Leadership:
+• Mental toughness
+• Leadership skills
+• Resilience building
+• Sports psychology" fillcolor="#FF6347"]
+	ready1 [label="Professional
+Ready?" fillcolor="#FFE4B5" shape=diamond]
+	transition1 [label="Consider
+Coaching Path" fillcolor="#F0E68C"]
+	pro1 [label="PROFESSIONAL STAGE
+
+Trials with Pro Clubs
+National Teams" fillcolor="#9370DB"]
+	pro2 [label="Contract Signing:
+• Professional contracts
+• Agent representation
+• Legal considerations" fillcolor="#9370DB"]
+	pro3 [label="Peak Performance:
+• Continuous fitness
+• Performance monitoring
+• Optimal diet & nutrition
+• Sleep & recovery
+• Mental health management" fillcolor="#9370DB"]
+	pro4 [label="Career Management:
+• Brand building
+• Media relations
+• Financial planning" fillcolor="#9370DB"]
+	continue1 [label="Continue
+Playing?" fillcolor="#FFE4B5" shape=diamond]
+	injury3 [label="Career-Ending
+Injury?" fillcolor="#FFE4B5" shape=diamond]
+	early_retire [label="Early Retirement
+Decision" fillcolor="#F0E68C"]
+	post1 [label="POST-PROFESSIONAL STAGE
+
+Retirement from Playing" fillcolor="#DDA0DD"]
+	post2 [label="Career Options:" fillcolor="#DDA0DD" shape=box]
+	coaching [label="Coaching:
+• Youth coaching
+• Professional coaching
+• Technical director" fillcolor="#DDA0DD"]
+	management [label="Management:
+• Team management
+• Sports administration
+• Club operations" fillcolor="#DDA0DD"]
+	media [label="Media & Punditry:
+• Broadcasting
+• Analysis
+• Commentary" fillcolor="#DDA0DD"]
+	business [label="Business Ventures:
+• Soccer academies
+• Sports equipment
+• Endorsements" fillcolor="#DDA0DD"]
+	recreational [label="Lifelong Involvement:
+• Recreational play
+• Mentoring
+• Community soccer" fillcolor="#DDA0DD"]
+	end [label="END:
+Soccer Legacy" fillcolor="#DDA0DD" fontsize=12 shape=ellipse style=filled]
+	start -> initial1
+	initial1 -> initial2
+	initial2 -> dec1
+	dec1 -> dev1 [label=Yes]
+	dec1 -> alt1 [label=No]
+	alt1 -> recreational [style=dashed]
+	dev1 -> dev2
+	dev2 -> injury1
+	injury1 -> int1 [label=No]
+	injury1 -> recovery1 [label=Yes]
+	recovery1 -> dev2 [label=Recovered style=dashed]
+	int1 -> int2
+	int2 -> perf1
+	perf1 -> injury2 [label=Yes]
+	perf1 -> alt2 [label=No]
+	alt2 -> post1 [style=dashed]
+	injury2 -> adv1 [label=No]
+	injury2 -> recovery2 [label=Yes]
+	recovery2 -> int2 [label=Recovered style=dashed]
+	recovery2 -> transition1 [label="Career Change" style=dashed]
+	transition1 -> coaching [style=dashed]
+	adv1 -> adv2
+	adv2 -> adv3
+	adv3 -> ready1
+	ready1 -> pro1 [label=Yes]
+	ready1 -> alt2 [label="Not Yet" style=dashed]
+	pro1 -> pro2
+	pro2 -> injury3
+	injury3 -> pro3 [label=No]
+	injury3 -> early_retire [label=Yes]
+	early_retire -> post1 [style=dashed]
+	pro3 -> pro4
+	pro4 -> continue1
+	continue1 -> pro3 [label=Yes constraint=false]
+	continue1 -> post1 [label="No/Retire"]
+	post1 -> post2
+	post2 -> coaching
+	post2 -> management
+	post2 -> media
+	post2 -> business
+	post2 -> recreational
+	coaching -> end
+	management -> end
+	media -> end
+	business -> end
+	recreational -> end
+}

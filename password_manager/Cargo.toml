@@ -12,6 +12,8 @@ aes-gcm = "0.10"
 argon2 = "0.5"
 rand = "0.8"
 zeroize = { version = "1.7", features = ["derive"] }
+totp-lite = "2.0"
+sha1 = "0.10"
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -21,15 +23,28 @@ serde_json = "1.0"
 clap = { version = "4.4", features = ["derive", "cargo"] }
 rpassword = "7.3"
 colored = "2.1"
+dialoguer = "0.11"
+comfy-table = "7.1"
+indicatif = "0.17"
+console = "0.15"
 
 # Utilities
 anyhow = "1.0"
 thiserror = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 dirs = "5.0"
+humantime = "2.1"
+fuzzy-matcher = "0.3"
 
 # Clipboard
 cli-clipboard = "0.4"
+
+# Password strength
+zxcvbn = "3.1"
+
+# Configuration
+config = "0.14"
+toml = "0.8"
 
 [dev-dependencies]
 tempfile = "3.8"
