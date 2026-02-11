@@ -2,6 +2,7 @@ use clap::Parser;
 use colored::*;
 use std::process;
 
+mod analytics;
 mod cli;
 mod crypto;
 mod errors;
