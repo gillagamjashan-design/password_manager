@@ -6,6 +6,7 @@ mod cli;
 mod crypto;
 mod errors;
 mod models;
+mod security;
 mod vault;
 
 use cli::{
