@@ -130,6 +130,23 @@ When invoked, Claude will:
 
 Use this after `/finish` to confirm the project actually runs the way the plan intended.
 
+### /add-installable-path
+
+**Purpose:** Build the agent-team release binary and install it to `~/.local/bin/` so it can be run as `agent-team` from any directory in the terminal.
+
+When invoked, Claude will:
+
+1. Create `scripts/install.sh` — a reusable install script
+2. Run `cargo build --release` to build the optimized binary
+3. Copy the binary to `~/.local/bin/agent-team`
+4. Add `~/.local/bin` to `$PATH` in `~/.bashrc` / `~/.zshrc` if not already present
+5. Verify the binary runs correctly
+6. Update `README.md` with installation instructions
+7. Append the installable-path feature to the oldest plan in `plans/`
+8. Commit all changes
+
+Use this once to make agent-team available system-wide.
+
 ---
 
 ## Critical Instruction: Maintain This File

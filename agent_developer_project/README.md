@@ -60,6 +60,29 @@ That's it. The agent team will run 3 sample tasks and print all output to your t
 
 ---
 
+## Installing to PATH (Run from Anywhere)
+
+To install `agent-team` as a system command you can run from any directory:
+
+**Step 1: Run the install script**
+```bash
+bash scripts/install.sh
+```
+
+**Step 2: Apply the PATH change (if prompted)**
+```bash
+source ~/.bashrc
+```
+
+**Step 3: Run from anywhere**
+```bash
+agent-team
+```
+
+To reinstall after making code changes, just run `bash scripts/install.sh` again.
+
+---
+
 ## How to Add Your Own Tasks
 
 Open `src/main.rs` and add a new `pipeline.run()` call:
