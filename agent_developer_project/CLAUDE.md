@@ -34,7 +34,8 @@ Claude should always orient itself through `/prime` at session start, then act w
 │       ├── create-plan.md  # /create-plan — create implementation plans
 │       ├── implement.md   # /implement — execute plans
 │       ├── template.md    # /template — scaffold files from plan
-│       └── finish.md      # /finish — fully implement all stubbed files
+│       ├── finish.md      # /finish — fully implement all stubbed files
+│       └── project-testing.md  # /project-testing — test the running project against the plan
 ├── context/               # Background context about the user and project
 │                          # (User should populate with role, goals, strategies)
 ├── plans/                 # Implementation plans created by /create-plan
@@ -113,6 +114,22 @@ When invoked, Claude will:
 
 Use this after `/template` has scaffolded the files and you're ready to go from stubs to a fully working project.
 
+### /project-testing
+
+**Purpose:** Verify the running project behaves exactly as its plan describes. Fixes failures automatically and only reports "done" when all behavioral expectations pass.
+
+When invoked, Claude will:
+
+1. Find the oldest plan in `plans/`
+2. Extract behavioral expectations from the plan (what each agent should print, what order they run, what output the program produces)
+3. Build the project with `cargo build`
+4. Run the project with `cargo run` and capture the output
+5. Check every expectation against the actual output
+6. If anything fails, call a fix agent and re-run from scratch
+7. Loop until all expectations pass (max 5 rounds), then report "done"
+
+Use this after `/finish` to confirm the project actually runs the way the plan intended.
+
 ---
 
 ## Critical Instruction: Maintain This File
@@ -150,8 +167,9 @@ To customize this workspace to your own needs, fill in your context documents in
 3. **Plan changes**: Use `/create-plan` before significant additions
 4. **Scaffold (optional)**: Use `/template` to create starter files from the plan
 5. **Finish**: Use `/finish` to fully implement all files from the plan (build + commit included)
-6. **Execute (alternative)**: Use `/implement` to execute plans step-by-step with a specific plan path
-7. **Maintain**: Claude updates CLAUDE.md and context/ as the workspace evolves
+6. **Test**: Use `/project-testing` to confirm the running project matches the plan's behavioral expectations
+7. **Execute (alternative)**: Use `/implement` to execute plans step-by-step with a specific plan path
+8. **Maintain**: Claude updates CLAUDE.md and context/ as the workspace evolves
 
 ---
 
