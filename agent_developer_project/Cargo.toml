@@ -1,0 +1,13 @@
+[package]
+name = "agent-team"
+version = "0.1.0"
+edition = "2021"
+description = "A multi-agent coding assistant built in Rust"
+authors = ["Jashan"]
+
+[[bin]]
+name = "agent-team"
+path = "src/main.rs"
+
+[dependencies]
+# No external dependencies — uses only Rust standard library

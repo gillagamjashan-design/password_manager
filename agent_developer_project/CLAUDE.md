@@ -52,6 +52,9 @@ Claude should always orient itself through `/prime` at session start, then act w
 | `outputs/`   | Deliverables, analyses, reports, and work products.                                 |
 | `reference/` | Helpful docs, templates and patterns to assist in various workflows.                |
 | `scripts/`   | Any automation or tooling scripts.                                                  |
+| `src/`       | Rust source code for the multi-agent coding system                                  |
+| `Cargo.toml` | Rust project manifest                                                               |
+| `README.md`  | Beginner-friendly project documentation                                             |
 
 ---
 
