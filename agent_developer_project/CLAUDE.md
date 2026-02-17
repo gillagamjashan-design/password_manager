@@ -33,7 +33,8 @@ Claude should always orient itself through `/prime` at session start, then act w
 │       ├── prime.md       # /prime — session initialization
 │       ├── create-plan.md  # /create-plan — create implementation plans
 │       ├── implement.md   # /implement — execute plans
-│       └── template.md    # /template — scaffold files from plan
+│       ├── template.md    # /template — scaffold files from plan
+│       └── finish.md      # /finish — fully implement all stubbed files
 ├── context/               # Background context about the user and project
 │                          # (User should populate with role, goals, strategies)
 ├── plans/                 # Implementation plans created by /create-plan
@@ -95,6 +96,20 @@ Run this after `/create-plan` and before `/implement` to create the file structu
 
 This gives you a navigable project skeleton before running `/implement` to fill in the full code.
 
+### /finish
+
+**Purpose:** Fully implement all stubbed files from the current project plan, producing a complete working project.
+
+When invoked, Claude will:
+
+1. Find the oldest plan in `plans/`
+2. Read the complete file content specifications from the plan's Step-by-Step Tasks
+3. Write every file completely (overwriting any stubs from `/template`)
+4. Run `cargo build` to verify the project compiles
+5. Commit all changes to git
+
+Use this after `/template` has scaffolded the files and you're ready to go from stubs to a fully working project.
+
 ---
 
 ## Critical Instruction: Maintain This File
@@ -131,8 +146,9 @@ To customize this workspace to your own needs, fill in your context documents in
 2. **Work**: Use commands or direct Claude with tasks
 3. **Plan changes**: Use `/create-plan` before significant additions
 4. **Scaffold (optional)**: Use `/template` to create starter files from the plan
-5. **Execute**: Use `/implement` to execute plans
-6. **Maintain**: Claude updates CLAUDE.md and context/ as the workspace evolves
+5. **Finish**: Use `/finish` to fully implement all files from the plan (build + commit included)
+6. **Execute (alternative)**: Use `/implement` to execute plans step-by-step with a specific plan path
+7. **Maintain**: Claude updates CLAUDE.md and context/ as the workspace evolves
 
 ---
 
