@@ -220,6 +220,26 @@ Brain assignments:
 - **Validator** → Claude (Testing)
 
 Requires environment variables: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`
+### /refactor
+
+**Purpose:** Delete ALL external AI API code and rewrite every agent with a specialized pure-Rust brain — zero API keys, zero external services needed.
+
+When invoked, Claude will spawn 4 agents (1 Opus 4.5 + 3 Sonnet 4.5):
+1. Opus 4.5 reads the codebase and plans the rewrite
+2. Sonnet 4.5 deletes ai_client.rs, removes HTTP dependencies, cleans main.rs
+3. Sonnet 4.5 rewrites all agent files with built-in Rust brains
+4. Sonnet 4.5 builds, verifies, updates docs, commits
+
+After running: **zero API keys needed**. Just `cargo run`.
+
+Built-in brain assignments:
+- **Planner** — keyword-based task analysis → tailored steps (sort, reverse, fibonacci, etc.)
+- **Coder** — task-type detection → real working Rust code templates
+- **Reviewer** — static analysis rules → code quality checks
+- **Debugger** — known fix patterns → automatic issue resolution
+- **Validator** — keyword + structure checks → task match confirmation
+
+
 
 ---
 

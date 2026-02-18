@@ -1355,3 +1355,27 @@ Get keys at: platform.openai.com, platform.deepseek.com, console.anthropic.com
 - Gemini (region blocked) and Grok (too expensive) are excluded
 - If a key is missing, the agent will return an error message rather than crashing
 - The `/brain-chips` slash command in Claude Code handles the full wiring automatically
+
+---
+
+## Feature Added: Pure-Rust Agent Brains — Zero API Keys (2026-02-18)
+
+**Command:** `/refactor`
+**Status:** Implemented
+
+### What Changed
+
+- Deleted src/ai_client.rs entirely — no more external AI calls
+- Removed reqwest, serde, serde_json from Cargo.toml
+- Removed mod ai_client from src/main.rs
+- Rewrote all agents with specialized pure-Rust brains:
+  - Planner: keyword analysis detects task type (sort, reverse, fibonacci, factorial, prime, search, count, filter) and returns tailored implementation steps
+  - Coder: task-type detection generates real working Rust code templates (not stubs)
+  - Reviewer: static analysis checks for missing main(), missing comments, excessive unwrap(), placeholders
+  - Debugger: applies known fix patterns automatically for each issue type
+  - Validator: keyword + structure checks confirm the code matches the user's task
+- Zero API keys required — project runs fully standalone
+
+### Why
+
+Full removal of all external AI dependencies. Any user can clone and immediately run with just cargo run.
