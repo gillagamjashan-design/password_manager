@@ -17,6 +17,7 @@
 // Type any coding task and press Enter. Type "exit" to quit.
 
 mod agents;
+mod ai_client;
 mod messages;
 mod pipeline;
 mod task;

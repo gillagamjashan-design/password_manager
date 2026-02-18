@@ -200,6 +200,27 @@ When invoked, Claude will:
 
 Use this when the agents are giving wrong/generic output or when the UI needs improvement.
 
+### /brain-chips
+
+**Purpose:** Wire each agent to a real AI brain — each agent calls a live AI model matched to its specialty.
+
+When invoked, Claude will:
+
+1. Add `reqwest`, `serde`, `serde_json` to `Cargo.toml`
+2. Create `src/ai_client.rs` with HTTP functions for OpenAI, DeepSeek, and Anthropic
+3. Rewrite all six agents to make real API calls to their assigned model
+4. Run `cargo build` to verify compilation
+5. Commit all changes
+
+Brain assignments:
+- **Coordinator + Planner** → Claude (Architecture)
+- **Coder** → GPT-4o (Coding)
+- **Reviewer** → Claude (Security & Docs)
+- **Debugger** → DeepSeek-Coder (Debugging & Optimization)
+- **Validator** → Claude (Testing)
+
+Requires environment variables: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`
+
 ---
 
 ## Critical Instruction: Maintain This File

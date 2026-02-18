@@ -1,69 +1,79 @@
+use crate::ai_client::call_deepseek;
 use crate::messages::{FinalPayload, ReviewPayload};
 
-/// The Debugger agent fixes issues identified by the Reviewer.
-/// Think of this as a developer who takes review feedback and applies the changes.
+/// The Debugger agent fixes issues found by the Reviewer and optimizes the code.
+/// Powered by: DeepSeek-Coder — Debugging & Optimization specialist.
 pub struct DebuggerAgent;
 
 impl DebuggerAgent {
-    pub fn new() -> Self {
-        DebuggerAgent
-    }
+    pub fn new() -> Self { DebuggerAgent }
 
-    /// Fixes any issues in the code found by the reviewer.
     pub fn process(&self, review: ReviewPayload) -> FinalPayload {
+        println!("\n\x1b[1;31m[DEBUGGER]\x1b[0m \x1b[2m· Brain: DeepSeek-Coder (Debugging & Optimization)\x1b[0m");
+
         if review.approved {
-            println!("\n\x1b[1;31m[DEBUGGER]\x1b[0m Code was already approved. No changes needed.");
-            return FinalPayload {
-                task_id: review.task_id,
-                code: review.code,
-                summary: "Code passed review with no issues.".to_string(),
-            };
+            println!("\x1b[1;31m[DEBUGGER]\x1b[0m Code already approved. Checking for optimizations...");
+        } else {
+            println!("\x1b[1;31m[DEBUGGER]\x1b[0m Fixing {} issue(s)...", review.issues.len());
         }
 
-        println!("\n\x1b[1;31m[DEBUGGER]\x1b[0m Fixing {} issue(s)...", review.issues.len());
-        let mut code = review.code.clone();
-        let mut fixes_applied = Vec::new();
+        let (fixed_code, summary) = self.fix_and_optimize(&review);
 
-        for issue in &review.issues {
-            if issue.contains("Missing comments") {
-                // Add a top-level comment if none exists
-                code = format!("// Agent-generated code\n// This file was produced by the agent team\n\n{}", code);
-                fixes_applied.push("Added missing documentation comment".to_string());
-            }
-            if issue.contains("Missing main()") {
-                // Append a minimal main function
-                code = format!("{}\n\nfn main() {{\n    println!(\"Running agent-generated code...\");\n}}", code);
-                fixes_applied.push("Added missing main() function".to_string());
-            }
-            if issue.contains("No output") {
-                // Note the issue in a comment — cannot safely inject println! without context
-                code = format!("// NOTE: Add println! calls to display output\n{}", code);
-                fixes_applied.push("Flagged missing output with comment".to_string());
-            }
-            if issue.contains("unwrap()") {
-                // Add a safety comment near unwrap usage
-                code = code.replace(
-                    ".unwrap()",
-                    ".unwrap() // safe here: input is validated above",
-                );
-                fixes_applied.push("Added safety comments on unwrap() calls".to_string());
-            }
-        }
-
-        println!("\x1b[1;31m[DEBUGGER]\x1b[0m Fixes applied:");
-        for fix in &fixes_applied {
-            println!("\x1b[1;31m[DEBUGGER]\x1b[0m   + {}", fix);
-        }
-        println!("\x1b[1;31m[DEBUGGER]\x1b[0m All issues resolved. Handing final code to Coordinator.");
+        println!("\x1b[1;31m[DEBUGGER]\x1b[0m {}", summary);
+        println!("\x1b[1;31m[DEBUGGER]\x1b[0m Handing final code to Coordinator.");
 
         FinalPayload {
             task_id: review.task_id,
-            code,
-            summary: format!(
-                "Applied {} fix(es): {}",
-                fixes_applied.len(),
-                fixes_applied.join(", ")
-            ),
+            code: fixed_code,
+            summary,
         }
+    }
+
+    fn fix_and_optimize(&self, review: &ReviewPayload) -> (String, String) {
+        let issues_text = if review.issues.is_empty() {
+            "No issues found — optimize for performance and clarity if possible.".to_string()
+        } else {
+            format!(
+                "Fix these issues:\n{}",
+                review.issues.iter().map(|i| format!("- {i}")).collect::<Vec<_>>().join("\n")
+            )
+        };
+
+        let system = "You are a Rust debugging and optimization specialist powered by DeepSeek-Coder. \
+            Fix all issues in the provided code and optimize it for performance and clarity. \
+            Return ONLY the fixed Rust code — no markdown, no backticks, no explanation.";
+
+        let user = format!(
+            "Code to fix/optimize:\n\n{}\n\n{}",
+            review.code, issues_text
+        );
+
+        match call_deepseek(system, &user) {
+            Ok(fixed) => {
+                let clean = self.clean_code_response(&fixed);
+                let summary = if review.approved {
+                    "Code optimized by DeepSeek-Coder.".to_string()
+                } else {
+                    format!("Fixed {} issue(s) and optimized with DeepSeek-Coder.", review.issues.len())
+                };
+                (clean, summary)
+            }
+            Err(e) => {
+                println!("\x1b[1;31m[DEBUGGER]\x1b[0m \x1b[33mDeepSeek unavailable: {e}\x1b[0m");
+                (review.code.clone(), "DeepSeek unavailable — original code passed through.".to_string())
+            }
+        }
+    }
+
+    fn clean_code_response(&self, code: &str) -> String {
+        let trimmed = code.trim();
+        if trimmed.starts_with("```") {
+            let inner = trimmed
+                .trim_start_matches("```rust")
+                .trim_start_matches("```")
+                .trim_end_matches("```");
+            return inner.trim().to_string();
+        }
+        trimmed.to_string()
     }
 }

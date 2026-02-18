@@ -1,69 +1,83 @@
+use crate::ai_client::call_claude;
 use crate::messages::{CodePayload, ReviewPayload};
 
-/// The Reviewer agent checks code for quality issues.
-/// Think of this as a senior engineer doing a code review before merging.
+/// The Reviewer agent checks code for security issues and documentation quality.
+/// Powered by: Claude (Anthropic) — Security & Docs specialist.
 pub struct ReviewerAgent;
 
 impl ReviewerAgent {
-    pub fn new() -> Self {
-        ReviewerAgent
-    }
+    pub fn new() -> Self { ReviewerAgent }
 
-    /// Reviews the code and returns feedback.
-    /// If no issues are found, the code is approved.
     pub fn process(&self, code_payload: CodePayload) -> ReviewPayload {
         println!("\n\x1b[1;35m[REVIEWER]\x1b[0m Received code for review. Analyzing...");
+        println!("\x1b[1;35m[REVIEWER]\x1b[0m \x1b[2m· Brain: Claude (Security & Docs)\x1b[0m");
 
-        let issues = self.check_for_issues(&code_payload.code);
+        let (issues, approved) = self.review_code(&code_payload.code);
 
-        if issues.is_empty() {
-            println!("\x1b[1;35m[REVIEWER]\x1b[0m No issues found. Code looks good!");
-            println!("\x1b[1;35m[REVIEWER]\x1b[0m Approved. Handing off to Debugger.");
+        if approved {
+            println!("\x1b[1;35m[REVIEWER]\x1b[0m No issues found. Code approved.");
         } else {
             println!("\x1b[1;35m[REVIEWER]\x1b[0m Found {} issue(s):", issues.len());
             for issue in &issues {
                 println!("\x1b[1;35m[REVIEWER]\x1b[0m   - {}", issue);
             }
-            println!("\x1b[1;35m[REVIEWER]\x1b[0m Sending to Debugger for fixes.");
         }
+        println!("\x1b[1;35m[REVIEWER]\x1b[0m Handing off to Debugger.");
 
         ReviewPayload {
             task_id: code_payload.task_id,
             code: code_payload.code,
-            issues: issues.clone(),
-            approved: issues.is_empty(),
+            issues,
+            approved,
         }
     }
 
-    /// Checks the code for common quality issues.
-    /// Returns a list of issue descriptions (empty = no issues).
-    fn check_for_issues(&self, code: &str) -> Vec<String> {
-        let mut issues = Vec::new();
+    fn review_code(&self, code: &str) -> (Vec<String>, bool) {
+        let system = "You are a Rust code security and documentation reviewer. \
+            Review the code for: security issues, missing comments, missing main(), \
+            excessive unwrap() usage, and correctness. \
+            If the code is good, reply with exactly: APPROVED\
+            If there are issues, list them one per line starting with '- '. \
+            Be concise. No extra explanation.";
 
-        // Check: does the code have at least one comment?
-        if !code.contains("///") && !code.contains("//") {
-            issues.push("Missing comments: code should be documented".to_string());
+        let user = format!("Review this Rust code:\n\n{code}");
+
+        match call_claude(system, &user) {
+            Ok(response) => self.parse_review(&response),
+            Err(e) => {
+                println!("\x1b[1;35m[REVIEWER]\x1b[0m \x1b[33mClaude unavailable: {e}\x1b[0m");
+                (self.fallback_check(code), false)
+            }
         }
+    }
 
-        // Check: does it have a main() function?
+    fn parse_review(&self, response: &str) -> (Vec<String>, bool) {
+        let trimmed = response.trim();
+        if trimmed.to_uppercase().contains("APPROVED") && !trimmed.contains("- ") {
+            return (vec![], true);
+        }
+        let issues: Vec<String> = trimmed
+            .lines()
+            .filter(|l| l.trim().starts_with("- ") || l.trim().starts_with("* "))
+            .map(|l| l.trim().trim_start_matches("- ").trim_start_matches("* ").to_string())
+            .filter(|s| !s.is_empty())
+            .collect();
+
+        if issues.is_empty() {
+            (vec![], true)
+        } else {
+            (issues, false)
+        }
+    }
+
+    fn fallback_check(&self, code: &str) -> Vec<String> {
+        let mut issues = vec![];
+        if !code.contains("//") && !code.contains("///") {
+            issues.push("Missing comments".to_string());
+        }
         if !code.contains("fn main()") {
-            issues.push("Missing main() function: code cannot be run as-is".to_string());
+            issues.push("Missing main() function".to_string());
         }
-
-        // Check: are there any println! calls for output?
-        if !code.contains("println!") {
-            issues.push("No output: code should print results so users can verify it works".to_string());
-        }
-
-        // Check: does it use unwrap() without explanation? (can panic)
-        let unwrap_count = code.matches(".unwrap()").count();
-        if unwrap_count > 2 {
-            issues.push(format!(
-                "Excessive unwrap() usage ({}): consider adding error handling comments",
-                unwrap_count
-            ));
-        }
-
         issues
     }
 }

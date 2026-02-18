@@ -17,6 +17,7 @@ impl CoordinatorAgent {
         let id = self.task_counter;
 
         println!("\n\x1b[1;32m[COORDINATOR]\x1b[0m New task assigned.");
+        println!("\x1b[1;32m[COORDINATOR]\x1b[0m \x1b[2m· Brain: Claude (Architecture)\x1b[0m");
         println!("\x1b[1;32m[COORDINATOR]\x1b[0m   ID: #{}", id);
         println!("\x1b[1;32m[COORDINATOR]\x1b[0m   Task: \"{}\"", description);
         println!("\x1b[1;32m[COORDINATOR]\x1b[0m Dispatching to Planner...");
