@@ -1315,3 +1315,43 @@ agent-team         # run from anywhere
 - Loops until the user types `exit` or `quit`
 
 The `/interactive-mode` slash command in Claude Code builds the project and launches this mode automatically.
+
+---
+
+## Feature Added: Real AI Brains via /brain-chips (2026-02-17)
+
+Each agent now calls a live AI API instead of using local keyword matching. The feature was implemented by adding `src/ai_client.rs` and rewriting all six agents.
+
+### Brain Assignments
+
+| Agent | Model | Provider | Specialty |
+|---|---|---|---|
+| Coordinator | `claude-3-5-sonnet-20241022` | Anthropic | Architecture |
+| Planner | `claude-3-5-sonnet-20241022` | Anthropic | Architecture |
+| Coder | `gpt-4o` | OpenAI | Coding |
+| Reviewer | `claude-3-5-sonnet-20241022` | Anthropic | Security & Docs |
+| Debugger | `deepseek-coder` | DeepSeek | Debugging & Optimization |
+| Validator | `claude-3-5-sonnet-20241022` | Anthropic | Testing |
+
+### New Files
+
+| File | Purpose |
+|---|---|
+| `src/ai_client.rs` | HTTP client functions for OpenAI, DeepSeek, and Anthropic APIs |
+
+### Required Environment Variables
+
+```bash
+export OPENAI_API_KEY="your-key"
+export DEEPSEEK_API_KEY="your-key"
+export ANTHROPIC_API_KEY="your-key"
+```
+
+Get keys at: platform.openai.com, platform.deepseek.com, console.anthropic.com
+
+### Implementation Notes
+
+- API keys are set as environment variables — never stored in code or files
+- Gemini (region blocked) and Grok (too expensive) are excluded
+- If a key is missing, the agent will return an error message rather than crashing
+- The `/brain-chips` slash command in Claude Code handles the full wiring automatically
