@@ -162,13 +162,13 @@ Use this once to make agent-team available system-wide.
 When invoked, Claude will:
 
 1. Run `cargo build` to ensure the binary is up to date
-2. Run `cargo run -- --interactive` to start the interactive session
+2. Run `cargo run` to start the interactive session (interactive mode is the default)
 3. The agent team prints a prompt and waits for your input
 4. Type any coding task (e.g., "write a function that reverses a string") and press Enter
 5. All five agents work on your task and print their output
 6. Type another task to continue, or type `exit` to stop
 
-Use this when you want to give the agent team your own tasks instead of the built-in sample tasks.
+Use this when you want to give the agent team your own tasks.
 
 ---
 

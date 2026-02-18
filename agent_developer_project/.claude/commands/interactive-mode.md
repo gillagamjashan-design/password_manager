@@ -6,4 +6,4 @@ Type "exit" or "quit" to stop.
 
 ## Run
 
-cargo build && cargo run -- --interactive
+cargo build && cargo run

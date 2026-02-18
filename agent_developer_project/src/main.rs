@@ -13,9 +13,9 @@
 //   Reviewer    — checks the code for quality issues
 //   Debugger    — fixes any issues the reviewer found
 //
-// Run with --interactive to enter interactive mode where you
-// type your own tasks and the agent team works on them live.
-// Type "exit" or "quit" to leave interactive mode.
+// The program starts in interactive mode by default — type any coding
+// task and the agent team will work on it live.
+// Type "exit" or "quit" to stop.
 
 mod agents;
 mod messages;
@@ -31,41 +31,7 @@ fn main() {
     println!("║      Built in Rust                   ║");
     println!("╚══════════════════════════════════════╝");
 
-    // Check if the user passed --interactive
-    let args: Vec<String> = std::env::args().collect();
-    let is_interactive = args.contains(&"--interactive".to_string());
-
-    if is_interactive {
-        interactive_loop();
-    } else {
-        // -------------------------------------------------------
-        // Run Task 1: Prime number checker
-        // -------------------------------------------------------
-        let mut pipeline = Pipeline::new();
-
-        println!("\n\n★★★ STARTING TASK 1 ★★★");
-        pipeline.run("write a function that checks if a number is prime");
-
-        println!("\n\n{}", "=".repeat(60));
-
-        // -------------------------------------------------------
-        // Run Task 2: Sorting algorithm
-        // -------------------------------------------------------
-        println!("\n★★★ STARTING TASK 2 ★★★");
-        pipeline.run("write a function that sorts an array of numbers");
-
-        println!("\n\n{}", "=".repeat(60));
-
-        // -------------------------------------------------------
-        // Run Task 3: Fibonacci sequence
-        // -------------------------------------------------------
-        println!("\n★★★ STARTING TASK 3 ★★★");
-        pipeline.run("write a function that returns the fibonacci sequence");
-
-        println!("\n\n{}", "=".repeat(60));
-        println!("\nAll tasks complete. The agent team has finished its work.");
-        println!("To run your own task, use: cargo run -- --interactive");
-    }
+    interactive_loop();
 }
 
 /// Interactive mode: waits for the user to type a task, runs the full
