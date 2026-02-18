@@ -31,6 +31,7 @@ Claude should always orient itself through `/prime` at session start, then act w
 ├── .claude/
 │   └── commands/          # Slash commands Claude can execute
 │       ├── prime.md       # /prime — session initialization
+│       ├── instructions.md # /instructions — install and run guidance
 │       ├── create-plan.md  # /create-plan — create implementation plans
 │       ├── implement.md   # /implement — execute plans
 │       ├── template.md    # /template — scaffold files from plan
@@ -70,6 +71,12 @@ Run this at the start of every session. Claude will:
 1. Read CLAUDE.md and context files
 2. Summarize understanding of the user, workspace, and goals
 3. Confirm readiness to assist
+
+### /instructions
+
+**Purpose:** Display beginner-friendly instructions for how to install and run the agent-team project.
+
+Run this when you want a quick guide to getting the project running. Claude will read the current project files and present clear step-by-step instructions covering prerequisites, building, running, and optional PATH installation.
 
 ### /create-plan [request]
 
