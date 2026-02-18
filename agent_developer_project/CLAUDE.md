@@ -37,7 +37,8 @@ Claude should always orient itself through `/prime` at session start, then act w
 │       ├── template.md    # /template — scaffold files from plan
 │       ├── finish.md      # /finish — fully implement all stubbed files
 │       ├── project-testing.md  # /project-testing — test the running project against the plan
-│       └── interactive-mode.md # /interactive-mode — run agent team interactively
+│       ├── interactive-mode.md # /interactive-mode — run agent team interactively
+│       └── make-path-interactive.md # /make-path-interactive — sync installed binary to latest source
 ├── context/               # Background context about the user and project
 │                          # (User should populate with role, goals, strategies)
 ├── plans/                 # Implementation plans created by /create-plan
@@ -169,6 +170,19 @@ When invoked, Claude will:
 6. Type another task to continue, or type `exit` to stop
 
 Use this when you want to give the agent team your own tasks.
+
+### /make-path-interactive
+
+**Purpose:** Rebuild and reinstall the agent-team binary so the installed PATH version launches interactive mode by default.
+
+Run this whenever you've made changes to the source code and want the installed `agent-team` binary to reflect those changes. Claude will:
+
+1. Run `bash scripts/install.sh` to rebuild the release binary
+2. Copy the updated binary to `~/.local/bin/agent-team`
+3. Verify the installed binary launches in interactive mode
+4. Report the result
+
+Use this to keep the installed binary in sync with the source code.
 
 ---
 
