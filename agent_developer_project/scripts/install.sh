@@ -5,7 +5,7 @@
 set -e  # Exit immediately if any command fails
 
 echo "[install] Building agent-team in release mode..."
-cargo build --release
+CARGO_HOME=/workspace/jashan/.cargo cargo build --release
 
 BINARY_SRC="./target/release/agent-team"
 INSTALL_DIR="$HOME/.local/bin"
