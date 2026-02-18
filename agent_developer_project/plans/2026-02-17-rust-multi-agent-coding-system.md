@@ -1302,3 +1302,16 @@ agent-team         # run from anywhere
 - Binary is installed to `~/.local/bin/agent-team`
 - PATH is automatically updated in `~/.bashrc` and `~/.zshrc` if needed
 - To reinstall after code changes, run `bash scripts/install.sh` again
+
+---
+
+## Feature Added: Interactive Mode (2026-02-17)
+
+`src/main.rs` now supports a `--interactive` flag. When run as `cargo run -- --interactive`
+(or `agent-team --interactive` if installed), the binary enters an interactive read-eval loop:
+- Prints a prompt: `Your task >`
+- Waits for the user to type any coding task
+- Runs the full five-agent pipeline (Coordinator → Planner → Coder → Reviewer → Debugger) on the input
+- Loops until the user types `exit` or `quit`
+
+The `/interactive-mode` slash command in Claude Code builds the project and launches this mode automatically.

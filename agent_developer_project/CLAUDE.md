@@ -36,7 +36,8 @@ Claude should always orient itself through `/prime` at session start, then act w
 │       ├── implement.md   # /implement — execute plans
 │       ├── template.md    # /template — scaffold files from plan
 │       ├── finish.md      # /finish — fully implement all stubbed files
-│       └── project-testing.md  # /project-testing — test the running project against the plan
+│       ├── project-testing.md  # /project-testing — test the running project against the plan
+│       └── interactive-mode.md # /interactive-mode — run agent team interactively
 ├── context/               # Background context about the user and project
 │                          # (User should populate with role, goals, strategies)
 ├── plans/                 # Implementation plans created by /create-plan
@@ -153,6 +154,21 @@ When invoked, Claude will:
 8. Commit all changes
 
 Use this once to make agent-team available system-wide.
+
+### /interactive-mode
+
+**Purpose:** Launch the agent team in interactive mode — type any coding task and the agents work on it live.
+
+When invoked, Claude will:
+
+1. Run `cargo build` to ensure the binary is up to date
+2. Run `cargo run -- --interactive` to start the interactive session
+3. The agent team prints a prompt and waits for your input
+4. Type any coding task (e.g., "write a function that reverses a string") and press Enter
+5. All five agents work on your task and print their output
+6. Type another task to continue, or type `exit` to stop
+
+Use this when you want to give the agent team your own tasks instead of the built-in sample tasks.
 
 ---
 

@@ -13,7 +13,9 @@
 //   Reviewer    — checks the code for quality issues
 //   Debugger    — fixes any issues the reviewer found
 //
-// Each agent prints what it's doing, so you can follow along!
+// Run with --interactive to enter interactive mode where you
+// type your own tasks and the agent team works on them live.
+// Type "exit" or "quit" to leave interactive mode.
 
 mod agents;
 mod messages;
@@ -21,6 +23,7 @@ mod pipeline;
 mod task;
 
 use pipeline::Pipeline;
+use std::io::{self, BufRead, Write};
 
 fn main() {
     println!("╔══════════════════════════════════════╗");
@@ -28,32 +31,101 @@ fn main() {
     println!("║      Built in Rust                   ║");
     println!("╚══════════════════════════════════════╝");
 
-    // Create the pipeline (this sets up all 5 agents)
+    // Check if the user passed --interactive
+    let args: Vec<String> = std::env::args().collect();
+    let is_interactive = args.contains(&"--interactive".to_string());
+
+    if is_interactive {
+        interactive_loop();
+    } else {
+        // -------------------------------------------------------
+        // Run Task 1: Prime number checker
+        // -------------------------------------------------------
+        let mut pipeline = Pipeline::new();
+
+        println!("\n\n★★★ STARTING TASK 1 ★★★");
+        pipeline.run("write a function that checks if a number is prime");
+
+        println!("\n\n{}", "=".repeat(60));
+
+        // -------------------------------------------------------
+        // Run Task 2: Sorting algorithm
+        // -------------------------------------------------------
+        println!("\n★★★ STARTING TASK 2 ★★★");
+        pipeline.run("write a function that sorts an array of numbers");
+
+        println!("\n\n{}", "=".repeat(60));
+
+        // -------------------------------------------------------
+        // Run Task 3: Fibonacci sequence
+        // -------------------------------------------------------
+        println!("\n★★★ STARTING TASK 3 ★★★");
+        pipeline.run("write a function that returns the fibonacci sequence");
+
+        println!("\n\n{}", "=".repeat(60));
+        println!("\nAll tasks complete. The agent team has finished its work.");
+        println!("To run your own task, use: cargo run -- --interactive");
+    }
+}
+
+/// Interactive mode: waits for the user to type a task, runs the full
+/// agent pipeline on it, then asks for the next task.
+/// Type "exit" or "quit" to stop.
+fn interactive_loop() {
     let mut pipeline = Pipeline::new();
 
-    // -------------------------------------------------------
-    // Run Task 1: Prime number checker
-    // -------------------------------------------------------
-    println!("\n\n★★★ STARTING TASK 1 ★★★");
-    pipeline.run("write a function that checks if a number is prime");
+    println!("\n╔══════════════════════════════════════╗");
+    println!("║        INTERACTIVE MODE ACTIVE       ║");
+    println!("╠══════════════════════════════════════╣");
+    println!("║  Type a coding task and press Enter  ║");
+    println!("║  The agent team will work on it.     ║");
+    println!("║  Type \"exit\" or \"quit\" to stop.      ║");
+    println!("╚══════════════════════════════════════╝\n");
 
-    println!("\n\n{}", "=".repeat(60));
+    let stdin = io::stdin();
 
-    // -------------------------------------------------------
-    // Run Task 2: Sorting algorithm
-    // -------------------------------------------------------
-    println!("\n★★★ STARTING TASK 2 ★★★");
-    pipeline.run("write a function that sorts an array of numbers");
+    loop {
+        // Print prompt
+        print!("Your task > ");
+        io::stdout().flush().expect("Failed to flush stdout");
 
-    println!("\n\n{}", "=".repeat(60));
+        // Read a line from the user
+        let mut input = String::new();
+        match stdin.lock().read_line(&mut input) {
+            Ok(0) => {
+                // EOF (Ctrl+D) — exit gracefully
+                println!("\n[AGENT TEAM] Input stream closed. Goodbye!");
+                break;
+            }
+            Ok(_) => {}
+            Err(e) => {
+                println!("[AGENT TEAM] Error reading input: {}", e);
+                break;
+            }
+        }
 
-    // -------------------------------------------------------
-    // Run Task 3: Fibonacci sequence
-    // -------------------------------------------------------
-    println!("\n★★★ STARTING TASK 3 ★★★");
-    pipeline.run("write a function that returns the fibonacci sequence");
+        let task = input.trim();
 
-    println!("\n\n{}", "=".repeat(60));
-    println!("\nAll tasks complete. The agent team has finished its work.");
-    println!("To run your own task, modify the pipeline.run() calls in src/main.rs");
+        // Skip empty input
+        if task.is_empty() {
+            continue;
+        }
+
+        // Exit commands
+        if task.eq_ignore_ascii_case("exit") || task.eq_ignore_ascii_case("quit") {
+            println!("\n[AGENT TEAM] Goodbye! Thanks for using Agent Team.");
+            break;
+        }
+
+        // Run the full pipeline on the user's task
+        println!("\n{}", "=".repeat(60));
+        println!("[AGENT TEAM] Starting work on your task...");
+        println!("{}", "=".repeat(60));
+
+        pipeline.run(task);
+
+        println!("\n{}", "=".repeat(60));
+        println!("[AGENT TEAM] Done! Ready for your next task.");
+        println!("{}\n", "=".repeat(60));
+    }
 }
