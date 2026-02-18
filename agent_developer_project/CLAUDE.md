@@ -220,6 +220,7 @@ Brain assignments:
 - **Validator** → Claude (Testing)
 
 Requires environment variables: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY`
+
 ### /refactor
 
 **Purpose:** Delete ALL external AI API code and rewrite every agent with a specialized pure-Rust brain — zero API keys, zero external services needed.

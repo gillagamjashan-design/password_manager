@@ -10,6 +10,3 @@ name = "agent-team"
 path = "src/main.rs"
 
 [dependencies]
-reqwest = { version = "0.12", features = ["blocking", "json"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"

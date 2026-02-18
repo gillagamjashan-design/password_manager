@@ -1,7 +1,7 @@
 # Plan: Add /interactive-mode Command
 
 **Created:** 2026-02-17
-**Status:** Draft
+**Status:** Implemented
 **Request:** Create a new /interactive-mode command that launches an agent which makes the agent team interactive — it waits for user input before running tasks, then loops until the user is done.
 
 ---

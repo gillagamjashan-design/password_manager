@@ -1,7 +1,7 @@
 # Plan: Add /instructions Command
 
 **Created:** 2026-02-17
-**Status:** Draft
+**Status:** Implemented
 **Request:** Create a `/instructions` command that gives users step-by-step instructions on how to install and run the agent-team project.
 
 ---
@@ -286,3 +286,21 @@ The implementation is complete when:
 - This command is read-only and safe to run at any time — it does not modify files or trigger builds
 - As the project evolves (e.g., new install methods, new run options), update `.claude/commands/instructions.md` to stay in sync with `README.md`
 - Future enhancement: the command could detect whether Rust is installed and tailor the instructions accordingly
+
+---
+
+## Implementation Notes
+
+**Implemented:** 2026-02-17
+
+### Summary
+
+Created `.claude/commands/instructions.md` with beginner-friendly guidance covering prerequisites, building, running, PATH installation, and adding custom tasks. Updated `CLAUDE.md` to document the new command in both the directory tree and the Commands section. Committed all changes.
+
+### Deviations from Plan
+
+The `.claude/` directory is listed in `.gitignore`, so `git add -f` was used to force-add the new command file. This is consistent with how other command files in the project are tracked.
+
+### Issues Encountered
+
+None beyond the gitignore handling noted above.
