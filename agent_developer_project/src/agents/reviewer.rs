@@ -12,19 +12,19 @@ impl ReviewerAgent {
     /// Reviews the code and returns feedback.
     /// If no issues are found, the code is approved.
     pub fn process(&self, code_payload: CodePayload) -> ReviewPayload {
-        println!("\n[REVIEWER] Received code for review. Analyzing...");
+        println!("\n\x1b[1;35m[REVIEWER]\x1b[0m Received code for review. Analyzing...");
 
         let issues = self.check_for_issues(&code_payload.code);
 
         if issues.is_empty() {
-            println!("[REVIEWER] No issues found. Code looks good!");
-            println!("[REVIEWER] Approved. Handing off to Coordinator.");
+            println!("\x1b[1;35m[REVIEWER]\x1b[0m No issues found. Code looks good!");
+            println!("\x1b[1;35m[REVIEWER]\x1b[0m Approved. Handing off to Debugger.");
         } else {
-            println!("[REVIEWER] Found {} issue(s):", issues.len());
+            println!("\x1b[1;35m[REVIEWER]\x1b[0m Found {} issue(s):", issues.len());
             for issue in &issues {
-                println!("[REVIEWER]   - {}", issue);
+                println!("\x1b[1;35m[REVIEWER]\x1b[0m   - {}", issue);
             }
-            println!("[REVIEWER] Sending to Debugger for fixes.");
+            println!("\x1b[1;35m[REVIEWER]\x1b[0m Sending to Debugger for fixes.");
         }
 
         ReviewPayload {

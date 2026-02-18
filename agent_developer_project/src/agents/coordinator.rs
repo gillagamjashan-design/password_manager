@@ -9,42 +9,40 @@ pub struct CoordinatorAgent {
 }
 
 impl CoordinatorAgent {
-    pub fn new() -> Self {
-        CoordinatorAgent { task_counter: 0 }
-    }
+    pub fn new() -> Self { CoordinatorAgent { task_counter: 0 } }
 
     /// Creates a new task and dispatches it to the pipeline.
-    /// Returns a TaskPayload that the Planner will receive.
     pub fn assign_task(&mut self, description: &str) -> (Task, TaskPayload) {
         self.task_counter += 1;
         let id = self.task_counter;
 
-        println!("\n[COORDINATOR] New task assigned.");
-        println!("[COORDINATOR]   ID: #{}", id);
-        println!("[COORDINATOR]   Task: \"{}\"", description);
-        println!("[COORDINATOR] Dispatching to Planner...");
+        println!("\n\x1b[1;32m[COORDINATOR]\x1b[0m New task assigned.");
+        println!("\x1b[1;32m[COORDINATOR]\x1b[0m   ID: #{}", id);
+        println!("\x1b[1;32m[COORDINATOR]\x1b[0m   Task: \"{}\"", description);
+        println!("\x1b[1;32m[COORDINATOR]\x1b[0m Dispatching to Planner...");
 
         let task = Task::new(id, description);
-        let payload = TaskPayload {
-            task_id: id,
-            description: description.to_string(),
-        };
-
+        let payload = TaskPayload { task_id: id, description: description.to_string() };
         (task, payload)
     }
 
     /// Receives the completed result from the Debugger and presents the final output.
-    pub fn receive_result(&self, mut task: Task, result: FinalPayload) {
+    /// Reports honestly whether validation passed or not.
+    pub fn receive_result(&self, mut task: Task, result: FinalPayload, validation_passed: bool) {
         task.status = TaskStatus::Complete;
         task.display_status();
 
-        println!("\n[COORDINATOR] Task #{} complete!", result.task_id);
-        println!("[COORDINATOR] Summary: {}", result.summary);
-        println!("\n========================================");
-        println!("         FINAL OUTPUT CODE");
-        println!("========================================");
+        if validation_passed {
+            println!("\n\x1b[1;32m[COORDINATOR]\x1b[0m \x1b[32mTask #{} complete!\x1b[0m", result.task_id);
+        } else {
+            println!("\n\x1b[1;32m[COORDINATOR]\x1b[0m \x1b[33mTask #{} — best effort output (validation did not fully pass)\x1b[0m", result.task_id);
+        }
+        println!("\x1b[1;32m[COORDINATOR]\x1b[0m Summary: {}", result.summary);
+        println!("\n\x1b[1m{}\x1b[0m", "═".repeat(50));
+        println!("\x1b[1m         FINAL OUTPUT CODE\x1b[0m");
+        println!("\x1b[1m{}\x1b[0m", "═".repeat(50));
         println!("{}", result.code);
-        println!("========================================");
-        println!("\n[COORDINATOR] All agents finished. Pipeline complete.");
+        println!("\x1b[1m{}\x1b[0m", "═".repeat(50));
+        println!("\n\x1b[1;32m[COORDINATOR]\x1b[0m All agents finished. Pipeline complete.");
     }
 }

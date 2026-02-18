@@ -30,7 +30,7 @@ impl Task {
     /// Print the current task status to the terminal
     pub fn display_status(&self) {
         println!(
-            "\n[TASK #{}] Status: {:?} — {}",
+            "\n  \x1b[2m[Task #{}] {:?} — {}\x1b[0m",
             self.id, self.status, self.description
         );
     }

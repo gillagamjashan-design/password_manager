@@ -38,7 +38,8 @@ Claude should always orient itself through `/prime` at session start, then act w
 │       ├── finish.md      # /finish — fully implement all stubbed files
 │       ├── project-testing.md  # /project-testing — test the running project against the plan
 │       ├── interactive-mode.md # /interactive-mode — run agent team interactively
-│       └── make-path-interactive.md # /make-path-interactive — sync installed binary to latest source
+│       ├── make-path-interactive.md # /make-path-interactive — sync installed binary to latest source
+│       └── fix.md             # /fix — fix agent bugs and overhaul interactive UI
 ├── context/               # Background context about the user and project
 │                          # (User should populate with role, goals, strategies)
 ├── plans/                 # Implementation plans created by /create-plan
@@ -183,6 +184,21 @@ Run this whenever you've made changes to the source code and want the installed 
 4. Report the result
 
 Use this to keep the installed binary in sync with the source code.
+
+### /fix
+
+**Purpose:** Spawn multiple agents to fix the agent-team project — repair the bug where agents say "finished" but ignore the user's task, then overhaul the interactive mode UI to match modern CLI tools.
+
+When invoked, Claude will:
+
+1. Spawn parallel subagents to diagnose the task-mismatch bug in `src/agents/`
+2. Fix the Coder and Planner to handle 15+ task types correctly
+3. Add a ValidatorAgent that confirms output matches the task before reporting success
+4. Overhaul `src/main.rs` with a styled UI (colored prompt, agent labels, dividers)
+5. Run `cargo build` to verify the project compiles
+6. Commit all changes
+
+Use this when the agents are giving wrong/generic output or when the UI needs improvement.
 
 ---
 

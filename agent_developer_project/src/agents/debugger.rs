@@ -12,7 +12,7 @@ impl DebuggerAgent {
     /// Fixes any issues in the code found by the reviewer.
     pub fn process(&self, review: ReviewPayload) -> FinalPayload {
         if review.approved {
-            println!("\n[DEBUGGER] Code was already approved. No changes needed.");
+            println!("\n\x1b[1;31m[DEBUGGER]\x1b[0m Code was already approved. No changes needed.");
             return FinalPayload {
                 task_id: review.task_id,
                 code: review.code,
@@ -20,7 +20,7 @@ impl DebuggerAgent {
             };
         }
 
-        println!("\n[DEBUGGER] Fixing {} issue(s)...", review.issues.len());
+        println!("\n\x1b[1;31m[DEBUGGER]\x1b[0m Fixing {} issue(s)...", review.issues.len());
         let mut code = review.code.clone();
         let mut fixes_applied = Vec::new();
 
@@ -50,11 +50,11 @@ impl DebuggerAgent {
             }
         }
 
-        println!("[DEBUGGER] Fixes applied:");
+        println!("\x1b[1;31m[DEBUGGER]\x1b[0m Fixes applied:");
         for fix in &fixes_applied {
-            println!("[DEBUGGER]   + {}", fix);
+            println!("\x1b[1;31m[DEBUGGER]\x1b[0m   + {}", fix);
         }
-        println!("[DEBUGGER] All issues resolved. Handing final code to Coordinator.");
+        println!("\x1b[1;31m[DEBUGGER]\x1b[0m All issues resolved. Handing final code to Coordinator.");
 
         FinalPayload {
             task_id: review.task_id,

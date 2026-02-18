@@ -6,3 +6,4 @@ pub mod coder;
 pub mod debugger;
 pub mod planner;
 pub mod reviewer;
+pub mod validator;

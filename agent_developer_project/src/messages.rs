@@ -1,6 +1,7 @@
 /// Messages are how agents talk to each other.
 /// Each variant represents a different stage of the pipeline.
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum AgentMessage {
     /// The coordinator sends a raw task to the planner
     TaskAssigned(TaskPayload),
@@ -33,6 +34,7 @@ pub struct PlanPayload {
 pub struct CodePayload {
     pub task_id: u32,
     pub code: String,
+    #[allow(dead_code)]
     pub language: String,
 }
 
@@ -51,4 +53,13 @@ pub struct FinalPayload {
     pub task_id: u32,
     pub code: String,
     pub summary: String,
+}
+
+/// The validator's output: did the final code match the user's task?
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct ValidationPayload {
+    pub task_id: u32,
+    pub passed: bool,
+    pub reason: String,
 }
