@@ -1,0 +1,7 @@
+[package]
+name = "agent-team-task-1"
+version = "0.1.0"
+edition = "2021"
+description = "write a function that adds two numbers"
+
+[dependencies]

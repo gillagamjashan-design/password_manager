@@ -10,3 +10,4 @@ name = "agent-team"
 path = "src/main.rs"
 
 [dependencies]
+chrono = "0.4"
