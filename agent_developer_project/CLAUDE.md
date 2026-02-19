@@ -240,7 +240,18 @@ Built-in brain assignments:
 - **Debugger** — known fix patterns → automatic issue resolution
 - **Validator** — keyword + structure checks → task match confirmation
 
+### /agent-fix
 
+**Purpose:** Fix the agent-team binary to write real project files to disk instead of just printing code to stdout.
+
+Run this when you notice that agent-team generates code but doesn't create any files. Claude will spawn 4 agents who:
+
+1. Architect agent reads the codebase and designs a file-writing system
+2. Implementer agent creates the file-writing module or agent
+3. Integrator agent wires file writing into the Coordinator
+4. Validator agent tests end-to-end and commits
+
+After running: The agent-team will create timestamped project directories (e.g., `agent-team-output-2026-02-18-14-23-05/`) with Cargo.toml, src/main.rs, and all generated code. You can immediately cd into the directory and run `cargo run`.
 
 ---
 
