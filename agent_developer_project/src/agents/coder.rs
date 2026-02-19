@@ -42,23 +42,323 @@ impl CoderAgent {
     }
 
     fn generate_outline(&self, description: &str) -> String {
-        // For outline, just return the full code structure with function signatures
-        // In a real implementation, this would be a skeleton with unimplemented!()
-        // For simplicity, we'll just return the same as generate_code for now
-        self.generate_code(description)
+        // Pass 1: Generate skeleton with function signatures and struct definitions only
+        let desc = description.to_lowercase();
+
+        if desc.contains("sort") || desc.contains("order") {
+            r#"/// Sorts a vector of integers in ascending order.
+fn sort_numbers(mut numbers: Vec<i32>) -> Vec<i32> {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("revers") {
+            r#"/// Reverses a string.
+fn reverse_string(s: &str) -> String {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("fibonacci") || desc.contains("fib") {
+            r#"/// Returns the nth Fibonacci number.
+fn fibonacci(n: u64) -> u64 {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("factorial") {
+            r#"/// Computes n! (n factorial).
+fn factorial(n: u64) -> u64 {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("prime") {
+            r#"/// Returns true if n is a prime number.
+fn is_prime(n: u64) -> bool {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("palindrome") {
+            r#"/// Returns true if the string is a palindrome.
+fn is_palindrome(s: &str) -> bool {
+    unimplemented!()
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("stack") {
+            r#"struct Stack<T> {
+    data: Vec<T>,
+}
+
+impl<T> Stack<T> {
+    fn new() -> Self { unimplemented!() }
+    fn push(&mut self, value: T) { unimplemented!() }
+    fn pop(&mut self) -> Option<T> { unimplemented!() }
+    fn peek(&self) -> Option<&T> { unimplemented!() }
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else if desc.contains("queue") {
+            r#"use std::collections::VecDeque;
+
+struct Queue<T> {
+    data: VecDeque<T>,
+}
+
+impl<T> Queue<T> {
+    fn new() -> Self { unimplemented!() }
+    fn enqueue(&mut self, value: T) { unimplemented!() }
+    fn dequeue(&mut self) -> Option<T> { unimplemented!() }
+}
+
+fn main() {
+    unimplemented!()
+}"#.to_string()
+        } else {
+            // Generic outline for unknown tasks
+            let func_name: String = description
+                .to_lowercase()
+                .split(|c: char| !c.is_alphabetic())
+                .filter(|w| w.len() > 3)
+                .take(2)
+                .collect::<Vec<_>>()
+                .join("_");
+            let func_name = if func_name.is_empty() { "run_task".to_string() } else { func_name };
+
+            format!(r#"/// Implements: {description}
+fn {func_name}(input: &str) -> String {{
+    unimplemented!()
+}}
+
+fn main() {{
+    unimplemented!()
+}}"#)
+        }
     }
 
     fn generate_draft(&self, _outline: &str, description: &str) -> String {
-        // For draft, add basic implementation
-        // In a real implementation, this would have TODO comments for edge cases
-        // For simplicity, we'll use generate_code
-        self.generate_code(description)
+        // Pass 2: Add basic implementation with TODO comments for edge cases
+        let desc = description.to_lowercase();
+
+        if desc.contains("sort") || desc.contains("order") {
+            r#"/// Sorts a vector of integers in ascending order.
+fn sort_numbers(mut numbers: Vec<i32>) -> Vec<i32> {
+    numbers.sort();
+    // TODO: handle edge case - empty vectors
+    // TODO: handle edge case - single element
+    numbers
+}
+
+fn main() {
+    let nums = vec![5, 2, 8, 1, 9, 3, 7, 4, 6];
+    println!("Before: {:?}", nums);
+    let sorted = sort_numbers(nums);
+    println!("After:  {:?}", sorted);
+    // TODO: add edge case examples
+}"#.to_string()
+        } else if desc.contains("revers") {
+            r#"/// Reverses a string.
+fn reverse_string(s: &str) -> String {
+    s.chars().rev().collect()
+    // TODO: handle edge case - empty strings
+    // TODO: verify Unicode handling
+}
+
+fn main() {
+    let examples = ["hello world", "Rust", "racecar"];
+    for s in &examples {
+        println!("Original: {:?}  =>  Reversed: {:?}", s, reverse_string(s));
+    }
+    // TODO: add empty string test
+}"#.to_string()
+        } else if desc.contains("fibonacci") || desc.contains("fib") {
+            r#"/// Returns the nth Fibonacci number.
+fn fibonacci(n: u64) -> u64 {
+    if n == 0 { return 0; }
+    if n == 1 { return 1; }
+    let (mut a, mut b) = (0u64, 1u64);
+    for _ in 2..=n {
+        let next = a + b;
+        a = b;
+        b = next;
+    }
+    b
+    // TODO: add documentation about time/space complexity
+}
+
+fn main() {
+    println!("First 10 Fibonacci numbers:");
+    for i in 0..10 {
+        println!("  fib({}) = {}", i, fibonacci(i));
+    }
+    // TODO: add larger example like fib(20)
+}"#.to_string()
+        } else if desc.contains("factorial") {
+            r#"/// Computes n! (n factorial).
+fn factorial(n: u64) -> u64 {
+    (1..=n).product()
+    // TODO: document that 0! = 1 by convention
+    // TODO: add complexity notes
+}
+
+fn main() {
+    println!("Factorials from 0 to 12:");
+    for i in 0..=12 {
+        println!("  {}! = {}", i, factorial(i));
+    }
+}"#.to_string()
+        } else if desc.contains("prime") {
+            r#"/// Returns true if n is a prime number.
+fn is_prime(n: u64) -> bool {
+    if n < 2 { return false; }
+    if n == 2 { return true; }
+    if n % 2 == 0 { return false; }
+    let mut i = 3u64;
+    while i * i <= n {
+        if n % i == 0 { return false; }
+        i += 2;
+    }
+    true
+    // TODO: add complexity analysis
+}
+
+fn main() {
+    let primes: Vec<u64> = (2..=50).filter(|&n| is_prime(n)).collect();
+    println!("Primes up to 50: {:?}", primes);
+    // TODO: add specific test cases like 1, 97, 100
+}"#.to_string()
+        } else if desc.contains("palindrome") {
+            r#"/// Returns true if the string is a palindrome.
+fn is_palindrome(s: &str) -> bool {
+    let cleaned: String = s.chars()
+        .filter(|c| c.is_alphabetic())
+        .map(|c| c.to_ascii_lowercase())
+        .collect();
+    let reversed: String = cleaned.chars().rev().collect();
+    cleaned == reversed
+    // TODO: add example showing case-insensitive behavior
+}
+
+fn main() {
+    let test_cases = ["racecar", "hello", "A man a plan a canal Panama"];
+    for s in &test_cases {
+        println!("is_palindrome({:?}) = {}", s, is_palindrome(s));
+    }
+    // TODO: add edge cases - empty string, single char
+}"#.to_string()
+        } else if desc.contains("stack") {
+            r#"struct Stack<T> {
+    data: Vec<T>,
+}
+
+impl<T> Stack<T> {
+    fn new() -> Self {
+        Stack { data: Vec::new() }
+    }
+
+    fn push(&mut self, value: T) {
+        self.data.push(value);
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        self.data.pop()
+    }
+
+    fn peek(&self) -> Option<&T> {
+        self.data.last()
+    }
+    // TODO: add is_empty() and size() methods
+}
+
+fn main() {
+    let mut stack: Stack<i32> = Stack::new();
+    for val in [10, 20, 30, 40] {
+        stack.push(val);
+        println!("Pushed {}", val);
+    }
+    // TODO: add peek example
+    // TODO: demonstrate popping all elements
+}"#.to_string()
+        } else if desc.contains("queue") {
+            r#"use std::collections::VecDeque;
+
+struct Queue<T> {
+    data: VecDeque<T>,
+}
+
+impl<T> Queue<T> {
+    fn new() -> Self {
+        Queue { data: VecDeque::new() }
+    }
+
+    fn enqueue(&mut self, value: T) {
+        self.data.push_back(value);
+    }
+
+    fn dequeue(&mut self) -> Option<T> {
+        self.data.pop_front()
+    }
+    // TODO: add peek(), is_empty(), size() methods
+}
+
+fn main() {
+    let mut q: Queue<&str> = Queue::new();
+    for name in ["Alice", "Bob", "Carol"] {
+        q.enqueue(name);
+        println!("Enqueued {:?}", name);
+    }
+    // TODO: demonstrate dequeuing
+}"#.to_string()
+        } else {
+            // Generic draft for unknown tasks
+            let func_name: String = description
+                .to_lowercase()
+                .split(|c: char| !c.is_alphabetic())
+                .filter(|w| w.len() > 3)
+                .take(2)
+                .collect::<Vec<_>>()
+                .join("_");
+            let func_name = if func_name.is_empty() { "run_task".to_string() } else { func_name };
+
+            format!(r#"/// Implements: {description}
+fn {func_name}(input: &str) -> String {{
+    let words: Vec<&str> = input.split_whitespace().collect();
+    format!("Processed {{}} word(s): {{}}", words.len(), input)
+    // TODO: add proper error handling
+    // TODO: handle empty input case
+}}
+
+fn main() {{
+    let inputs = ["hello world", "test input"];
+    for input in &inputs {{
+        let result = {func_name}(input);
+        println!("Input:  {{:?}}", input);
+        println!("Output: {{:?}}", result);
+    }}
+    // TODO: add edge case testing
+}}"#)
+        }
     }
 
     fn refine_code(&self, _draft: &str, description: &str) -> String {
-        // For refinement, replace TODOs with edge case handling and add doc comments
-        // In a real implementation, this would enhance the draft
-        // For simplicity, we'll use generate_code which already has full implementation
+        // Pass 3: Replace TODOs with full implementation, add doc comments with complexity notes
+        // Use the full generate_code() implementation which has all edge cases and documentation
         self.generate_code(description)
     }
 
