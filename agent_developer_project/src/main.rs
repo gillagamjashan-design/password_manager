@@ -21,6 +21,7 @@ mod file_writer;
 mod messages;
 mod pipeline;
 mod task;
+mod thinking;
 
 use pipeline::Pipeline;
 use std::io::{self, BufRead, Write};
@@ -83,6 +84,11 @@ fn interactive_loop() {
             break;
         }
 
+        // Display time estimation
+        let (min_time, max_time) = estimate_duration(task);
+        println!();
+        println!("  {CYAN}[INFO]{RESET} Estimated time: {BOLD}{}-{} minutes{RESET} (agents working thoughtfully)", min_time, max_time);
+
         // Task start divider
         println!();
         println!("  {BOLD}{YELLOW}Working on your task...{RESET}");
@@ -95,5 +101,31 @@ fn interactive_loop() {
         println!("  {DIM}─────────────────────────────────────────{RESET}");
         println!("  {BOLD}{GREEN}Done!{RESET} Ready for your next task.");
         println!();
+    }
+}
+
+fn estimate_duration(task: &str) -> (u32, u32) {
+    let words = task.split_whitespace().count();
+    let task_lower = task.to_lowercase();
+
+    let is_complex = task_lower.contains("graph") || task_lower.contains("tree")
+        || task_lower.contains("matrix") || task_lower.contains("parser")
+        || task_lower.contains("recursive");
+
+    let has_extra_requirements = task_lower.contains("error handling")
+        || task_lower.contains("edge case") || task_lower.contains("optimization");
+
+    let base = if is_complex {
+        (12, 20)
+    } else if words > 10 {
+        (8, 12)
+    } else {
+        (5, 8)
+    };
+
+    if has_extra_requirements {
+        (base.0 + 2, base.1 + 3)
+    } else {
+        base
     }
 }

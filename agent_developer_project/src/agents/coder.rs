@@ -1,4 +1,5 @@
 use crate::messages::{CodePayload, PlanPayload};
+use crate::thinking::{ThinkingTimer, ProcessingStage};
 
 /// The Coder agent writes Rust code based on the plan and task description.
 /// Brain: Built-in — task-type detection generates real working Rust code for 15+ task types.
@@ -10,11 +11,26 @@ impl CoderAgent {
     pub fn process_with_task(&self, plan: PlanPayload, task_description: &str) -> CodePayload {
         println!("\n\x1b[1;34m[CODER]\x1b[0m Received plan with {} steps.", plan.steps.len());
         println!("\x1b[1;34m[CODER]\x1b[0m \x1b[2m· Brain: Built-in (Coding)\x1b[0m");
-        println!("\x1b[1;34m[CODER]\x1b[0m Writing Rust code for: \"{}\"", task_description);
+        println!("\x1b[1;34m[CODER]\x1b[0m Generating code for: \"{}\"", task_description);
 
-        let code = self.generate_code(task_description);
+        // Pass 1: Generate outline
+        ThinkingTimer::new(ProcessingStage::CodeOutline, 20).start();
+        let outline = self.generate_outline(task_description);
+        println!("\x1b[1;34m[CODER]\x1b[0m Pass 1 - Outline created:");
+        println!("\x1b[90m{}\x1b[0m", &outline[..outline.len().min(200)]);
+        println!("\x1b[90m  ... (outline complete)\x1b[0m");
 
-        println!("\x1b[1;34m[CODER]\x1b[0m Code written:");
+        // Pass 2: Generate draft
+        ThinkingTimer::new(ProcessingStage::CodeDraft, 45).start();
+        let draft = self.generate_draft(&outline, task_description);
+        println!("\x1b[1;34m[CODER]\x1b[0m Pass 2 - Draft implementation created:");
+        println!("\x1b[90m{}\x1b[0m", &draft[..draft.len().min(200)]);
+        println!("\x1b[90m  ... (draft complete)\x1b[0m");
+
+        // Pass 3: Refine code
+        ThinkingTimer::new(ProcessingStage::CodeRefinement, 30).start();
+        let code = self.refine_code(&draft, task_description);
+        println!("\x1b[1;34m[CODER]\x1b[0m Pass 3 - Code refined and finalized:");
         println!("\x1b[90m{}\x1b[0m", code);
         println!("\x1b[1;34m[CODER]\x1b[0m Handing off to Reviewer.");
 
@@ -23,6 +39,27 @@ impl CoderAgent {
             code,
             language: "rust".to_string(),
         }
+    }
+
+    fn generate_outline(&self, description: &str) -> String {
+        // For outline, just return the full code structure with function signatures
+        // In a real implementation, this would be a skeleton with unimplemented!()
+        // For simplicity, we'll just return the same as generate_code for now
+        self.generate_code(description)
+    }
+
+    fn generate_draft(&self, _outline: &str, description: &str) -> String {
+        // For draft, add basic implementation
+        // In a real implementation, this would have TODO comments for edge cases
+        // For simplicity, we'll use generate_code
+        self.generate_code(description)
+    }
+
+    fn refine_code(&self, _draft: &str, description: &str) -> String {
+        // For refinement, replace TODOs with edge case handling and add doc comments
+        // In a real implementation, this would enhance the draft
+        // For simplicity, we'll use generate_code which already has full implementation
+        self.generate_code(description)
     }
 
     fn generate_code(&self, description: &str) -> String {

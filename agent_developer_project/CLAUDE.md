@@ -253,6 +253,25 @@ Run this when you notice that agent-team generates code but doesn't create any f
 
 After running: The agent-team will create timestamped project directories (e.g., `agent-team-output-2026-02-18-14-23-05/`) with Cargo.toml, src/main.rs, and all generated code. You can immediately cd into the directory and run `cargo run`.
 
+### /fix-agents
+
+**Purpose:** Fix agent quality, timing, and instruction adherence issues — make agents take 5-10 minutes for beginner projects and produce thoughtful, task-specific code.
+
+When invoked, Claude will:
+
+1. Spawn 8 agents in sequence to audit, design, implement, integrate, and test fixes
+2. Create `src/thinking.rs` with deliberate processing delays and progress indicators
+3. Enhance Planner to extract explicit requirements before planning (10s thinking)
+4. Enhance Coder to use three-pass generation: outline → draft → refinement (20s + 45s + 30s)
+5. Enhance Validator to generate and run test cases (15s + 20s)
+6. Update Pipeline to show real-time progress between stages
+7. Add time estimation to main.rs (5-8min beginner, 8-12min intermediate, 12-20min complex)
+8. Increase max retries from 3 to 5
+9. Run end-to-end test to verify 5-10 minute execution and quality output
+10. Commit all changes
+
+Use this when agents are producing instant low-quality output that doesn't match your task.
+
 ---
 
 ## Critical Instruction: Maintain This File

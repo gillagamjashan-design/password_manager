@@ -1,4 +1,5 @@
 use crate::messages::{PlanPayload, TaskPayload};
+use crate::thinking::{ThinkingTimer, ProcessingStage};
 
 /// The Planner agent breaks a task into ordered implementation steps.
 /// Brain: Built-in — keyword-based task analysis covering 15+ task types.
@@ -10,16 +11,94 @@ impl PlannerAgent {
     pub fn process(&self, task: TaskPayload) -> PlanPayload {
         println!("\n\x1b[1;36m[PLANNER]\x1b[0m Received task: \"{}\"", task.description);
         println!("\x1b[1;36m[PLANNER]\x1b[0m \x1b[2m· Brain: Built-in (Architecture)\x1b[0m");
+
+        // Stage 1: Extract requirements
+        ThinkingTimer::new(ProcessingStage::RequirementsExtraction, 10).start();
+        let requirements = self.extract_requirements(&task.description);
+        println!("\x1b[1;36m[PLANNER]\x1b[0m Extracted requirements:");
+        for (i, req) in requirements.iter().enumerate() {
+            println!("\x1b[1;36m[PLANNER]\x1b[0m   {}. {}", i + 1, req);
+        }
+
+        // Stage 2: Generate implementation steps
+        ThinkingTimer::new(ProcessingStage::Planning, 15).start();
         println!("\x1b[1;36m[PLANNER]\x1b[0m Breaking task down into steps...");
+        let mut steps = self.generate_steps(&task.description);
 
-        let steps = self.generate_steps(&task.description);
+        // Prepend requirements as special entries
+        let mut requirements_steps: Vec<String> = requirements
+            .iter()
+            .map(|req| format!("REQUIREMENT: {}", req))
+            .collect();
+        requirements_steps.append(&mut steps);
 
-        for (i, step) in steps.iter().enumerate() {
+        for (i, step) in requirements_steps.iter().enumerate() {
             println!("\x1b[1;36m[PLANNER]\x1b[0m   Step {}: {}", i + 1, step);
         }
         println!("\x1b[1;36m[PLANNER]\x1b[0m Plan complete. Handing off to Coder.");
 
-        PlanPayload { task_id: task.task_id, steps }
+        PlanPayload { task_id: task.task_id, steps: requirements_steps }
+    }
+
+    fn extract_requirements(&self, description: &str) -> Vec<String> {
+        let mut requirements = Vec::new();
+        let desc_lower = description.to_lowercase();
+        let words: Vec<&str> = description.split_whitespace().collect();
+
+        // Extract input requirements
+        for (i, word) in words.iter().enumerate() {
+            let word_lower = word.to_lowercase();
+            if word_lower == "takes" || word_lower == "accepts" || word_lower == "given" || word_lower == "input" {
+                if i + 1 < words.len() {
+                    let input_desc = words[i + 1..].iter().take(5).cloned().collect::<Vec<_>>().join(" ");
+                    requirements.push(format!("Input: {}", input_desc));
+                    break;
+                }
+            }
+        }
+
+        // Extract output requirements
+        for (i, word) in words.iter().enumerate() {
+            let word_lower = word.to_lowercase();
+            if word_lower == "returns" || word_lower == "produces" || word_lower == "output" {
+                if i + 1 < words.len() {
+                    let output_desc = words[i + 1..].iter().take(5).cloned().collect::<Vec<_>>().join(" ");
+                    requirements.push(format!("Output: {}", output_desc));
+                    break;
+                }
+            }
+        }
+
+        // Extract constraints
+        if desc_lower.contains("must be o(") || desc_lower.contains("complexity") {
+            requirements.push("Performance constraint specified in task".to_string());
+        }
+        if desc_lower.contains("recursion") || desc_lower.contains("recursive") {
+            requirements.push("Must use recursion".to_string());
+        }
+        if desc_lower.contains("no unwrap") || desc_lower.contains("error handling") {
+            requirements.push("Must handle errors properly without unwrap()".to_string());
+        }
+
+        // Extract edge cases
+        if desc_lower.contains("empty") {
+            requirements.push("Handle empty input".to_string());
+        }
+        if desc_lower.contains("negative") {
+            requirements.push("Handle negative numbers".to_string());
+        }
+        if desc_lower.contains("unicode") {
+            requirements.push("Support Unicode characters".to_string());
+        }
+
+        // Default requirements if none found
+        if requirements.is_empty() {
+            requirements.push("Process the input meaningfully".to_string());
+            requirements.push("Return a valid result".to_string());
+            requirements.push("Handle edge cases (empty/null inputs)".to_string());
+        }
+
+        requirements
     }
 
     fn generate_steps(&self, description: &str) -> Vec<String> {
